@@ -1,4 +1,4 @@
-# @pybara/ic-protocol - Status
+# @yogabuild/pybara-ic-protocol - Status
 
 **Version**: 1.1.0  
 **Status**: ✅ **Production Ready**  

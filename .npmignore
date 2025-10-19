@@ -1,0 +1,18 @@
+# Git backups
+.git.backup/
+
+# Development files
+.git/
+.vscode/
+.idea/
+*.log
+node_modules/
+
+# Documentation (keep only what's needed)
+docs/CLEANUP_SUMMARY.md
+EXTRACTION_COMPLETE.md
+RELEASE_NOTES_v1.1.0.md
+
+# Source maps (optional - remove if you want smaller package)
+dist/*.map
+

@@ -1,8 +1,8 @@
 {
-  "name": "@pybara/ic-protocol",
+  "name": "@yogabuild/pybara-ic-protocol",
   "version": "1.1.0",
   "description": "Shared Internet Computer protocol integration for Pybara payment gateway - platform-agnostic",
-  "author": "Pybara",
+  "author": "Yogabuild",
   "license": "MIT",
   "type": "module",
   "main": "dist/pybara-ic-protocol.js",
@@ -50,6 +50,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/pybara/pybara-ic-protocol.git"
+    "url": "https://github.com/yogabuild/pybara-ic-protocol.git"
   }
 }

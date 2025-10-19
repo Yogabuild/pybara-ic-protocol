@@ -1,4 +1,4 @@
-# 🦫 @pybara/ic-protocol
+# 🦫 @yogabuild/pybara-ic-protocol
 
 **Shared Internet Computer protocol integration for Pybara payment gateway**
 
@@ -29,7 +29,7 @@ This package contains all the **platform-agnostic** code for Pybara's Internet C
 ## 📦 Installation
 
 ```bash
-npm install @pybara/ic-protocol
+npm install @yogabuild/pybara-ic-protocol
 ```
 
 ---
@@ -39,7 +39,7 @@ npm install @pybara/ic-protocol
 ### **1. Initialize IC Agent**
 
 ```javascript
-import { PybaraAgent } from '@pybara/ic-protocol';
+import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
 
 const agent = new PybaraAgent({
   canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai', // Pybara backend canister
@@ -74,7 +74,7 @@ console.log('Price Used:', result.priceUsed);
 ### **2. Connect Wallet**
 
 ```javascript
-import { WalletManager } from '@pybara/ic-protocol/wallets';
+import { WalletManager } from '@yogabuild/pybara-ic-protocol/wallets';
 
 const walletManager = new WalletManager();
 
@@ -91,7 +91,7 @@ const balance = await walletManager.getBalance('ckBTC');
 ### **3. Execute Payment**
 
 ```javascript
-import { PaymentExecutor } from '@pybara/ic-protocol';
+import { PaymentExecutor } from '@yogabuild/pybara-ic-protocol';
 
 const executor = new PaymentExecutor(agent, walletManager);
 
@@ -117,7 +117,7 @@ console.log('Platform TX:', result.platformTxId);
 ### **Core Module**
 
 ```javascript
-import { PybaraAgent } from '@pybara/ic-protocol';
+import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
 
 // Initialize agent
 const agent = new PybaraAgent(config);
@@ -144,7 +144,7 @@ await agent.getMinimumAmount(token);     // Get minimum order amount
 These methods make it easy to build checkout UIs and token pickers.
 
 ```javascript
-import { PybaraAgent } from '@pybara/ic-protocol';
+import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
 
 const agent = new PybaraAgent(config);
 
@@ -179,7 +179,7 @@ import {
   WalletManager,
   OisyWalletAdapter,
   PlugWalletAdapter,
-} from '@pybara/ic-protocol/wallets';
+} from '@yogabuild/pybara-ic-protocol/wallets';
 
 // Create wallet manager
 const manager = new WalletManager();
@@ -210,7 +210,7 @@ import {
   BalanceChecker,
   PriceCache,
   MinimumChecker,
-} from '@pybara/ic-protocol/payment';
+} from '@yogabuild/pybara-ic-protocol/payment';
 
 // Check if user has sufficient balance
 const checker = new BalanceChecker(walletManager);
@@ -232,7 +232,7 @@ import {
   WalletSelector,
   PaymentProgress,
   TokenPicker,
-} from '@pybara/ic-protocol/ui';
+} from '@yogabuild/pybara-ic-protocol/ui';
 
 // Render wallet selector
 const selector = new WalletSelector({
@@ -260,7 +260,7 @@ progress.complete('Payment successful!');
 
 ```javascript
 // woocommerce-pybara/assets/js/checkout.js
-import { PybaraAgent, WalletManager } from '@pybara/ic-protocol';
+import { PybaraAgent, WalletManager } from '@yogabuild/pybara-ic-protocol';
 
 const agent = new PybaraAgent({ /* config */ });
 const wallets = new WalletManager();
@@ -280,7 +280,7 @@ jQuery(document.body).on('checkout_place_order_wc_pybara', async function() {
 
 ```typescript
 // pybara-shopify/extensions/checkout/Checkout.tsx
-import { PybaraAgent, WalletManager } from '@pybara/ic-protocol';
+import { PybaraAgent, WalletManager } from '@yogabuild/pybara-ic-protocol';
 import { useEffect, useState } from 'react';
 
 export function PybaraCheckout() {
@@ -304,7 +304,7 @@ export function PybaraCheckout() {
 
 ```javascript
 // pybara-magento/view/frontend/web/js/view/payment/method-renderer/pybara.js
-import { PybaraAgent, WalletManager } from '@pybara/ic-protocol';
+import { PybaraAgent, WalletManager } from '@yogabuild/pybara-ic-protocol';
 
 define(['uiComponent'], function(Component) {
   return Component.extend({
@@ -352,7 +352,7 @@ const config = {
 ### **Custom Configuration**
 
 ```javascript
-import { PybaraAgent, config } from '@pybara/ic-protocol';
+import { PybaraAgent, config } from '@yogabuild/pybara-ic-protocol';
 
 // Override defaults
 config.debug = true;
@@ -384,7 +384,7 @@ npm run test:e2e
 ## 📁 Package Structure
 
 ```
-@pybara/ic-protocol/
+@yogabuild/pybara-ic-protocol/
 ├── src/
 │   ├── core/
 │   │   ├── canister-idl.js       # Candid interface
