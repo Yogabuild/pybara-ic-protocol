@@ -1,0 +1,55 @@
+{
+  "name": "@pybara/ic-protocol",
+  "version": "1.1.0",
+  "description": "Shared Internet Computer protocol integration for Pybara payment gateway - platform-agnostic",
+  "author": "Pybara",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/pybara-ic-protocol.js",
+  "module": "dist/pybara-ic-protocol.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/pybara-ic-protocol.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./wallets": {
+      "import": "./dist/pybara-wallets.js"
+    },
+    "./ui": {
+      "import": "./dist/pybara-ui.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dfinity/agent": "^3.2.7",
+    "@dfinity/auth-client": "^3.2.0",
+    "@dfinity/candid": "^3.2.7",
+    "@dfinity/identity": "^3.2.7",
+    "@dfinity/oisy-wallet-signer": "^1.1.0",
+    "@dfinity/principal": "^3.2.7"
+  },
+  "devDependencies": {
+    "terser": "^5.44.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "pybara",
+    "internet-computer",
+    "icp",
+    "crypto",
+    "payments",
+    "woocommerce",
+    "shopify",
+    "e-commerce"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pybara/pybara-ic-protocol.git"
+  }
+}

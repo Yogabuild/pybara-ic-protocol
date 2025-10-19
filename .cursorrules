@@ -1,0 +1,58 @@
+# pybara-ic-protocol Rules
+
+**FIRST: Read pybara-hub for full context**
+Location: /Users/djo/ic_projects/pybara-hub
+
+## This Package's Role
+Low-level SDK for Internet Computer protocol communication.
+Used by: WooCommerce, Shopify, ic-checkout, Caffeine (future).
+
+## Keep It MINIMAL
+- Core methods only (< 15 methods total)
+- No platform-specific code
+- No UI components
+- Stable API (breaking changes are rare)
+
+## Before Adding a Method
+Ask: "Does EVERY platform need this, or just one?"
+- If EVERY platform → add to protocol ✅
+- If ONE platform → belongs in that platform's adapter ❌
+
+
+
+# Project Instructions
+
+AGENTS.md is only for general context. 
+Not specific for this project.
+
+## Documentation
+- I like documentation, but not over-documentation. 
+- Keep it tight and relevant. Find a good balance.
+- It is important to keep what will be useful in the future, and the overall foundation to understand what the project is, how it is structured.
+- Everything that makes no sense to keep can go, yet you can keep a trace of the important lessons learned.
+- All docs should in the same /docs folder structure, and have the needed comprehensive subfolders.  
+- Please read all docs when starting a new conversation.
+
+## Todos
+Never clean up the todo list unless I expressly ask for it.
+
+## Tools 
+- Always use Vite when building ICP projects, as this is what Dfinity uses.
+
+## Internet Computer (IC) Development - TOP PRIORITY
+- **ALWAYS consult IC_DEVELOPMENT_KNOWLEDGE.md first** - Contains proven Caffeine.ai solutions
+- **If knowledge base doesn't cover the issue, ask Caffeine.ai** - This is CRITICAL
+- For IC-related errors, bugs, or best practices: create a detailed question document and ask the user to consult Caffeine.ai
+- Common IC topics requiring Caffeine.ai consultation:
+  - Motoko stable storage migrations
+  - Candid interface definitions and variant tag ordering
+  - ICRC-1/ICRC-2 ledger integration
+  - Inter-canister calls and actor references
+  - Canister upgrade strategies
+  - Security best practices for canisters
+- When you create Caffeine.ai question documents, create them in the project root folder and remove them after digesting the information
+- **After getting Caffeine.ai answers, update IC_DEVELOPMENT_KNOWLEDGE.md** with the new learnings
+
+## Investigating
+- Always make sure we are going the most secure way.
+
