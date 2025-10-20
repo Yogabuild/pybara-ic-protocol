@@ -1,8 +1,12 @@
 # 🦫 @yogabuild/pybara-ic-protocol
 
-**Shared Internet Computer protocol integration for Pybara payment gateway**
+[![npm version](https://img.shields.io/npm/v/@yogabuild/pybara-ic-protocol.svg)](https://www.npmjs.com/package/@yogabuild/pybara-ic-protocol)
+[![npm downloads](https://img.shields.io/npm/dm/@yogabuild/pybara-ic-protocol.svg)](https://www.npmjs.com/package/@yogabuild/pybara-ic-protocol)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-Platform-agnostic JavaScript library for integrating crypto payments into any e-commerce platform.
+**JavaScript SDK for Pybara payment gateway.** Connects to Pybara's Internet Computer backend to handle crypto payments for WooCommerce, Shopify, and custom integrations.
+
+**📦 npm:** https://www.npmjs.com/package/@yogabuild/pybara-ic-protocol
 
 ---
 
