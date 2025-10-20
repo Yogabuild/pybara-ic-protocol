@@ -288,18 +288,44 @@ export class PybaraAgent {
 
   /**
    * Record payment on canister (after successful transfer)
+   * @param {number} paymentId - Optional payment ID for direct lookup (preferred)
+   * @param {number} orderId - Order ID (fallback if paymentId not provided)
+   * @param {string} siteUrl - Site URL (fallback if paymentId not provided)
+   * @param {string|Principal} merchantPrincipal - Merchant principal (fallback if paymentId not provided)
+   * @param {number} txId - Transaction ID (block index)
+   * @param {bigint} receivedAmount - Amount received in smallest units
    */
-  async recordPayment(orderId, siteUrl, merchantPrincipal, txId, receivedAmount) {
+  async recordPayment(paymentId, orderId, siteUrl, merchantPrincipal, txId, receivedAmount) {
     if (!this.actor) {
       await this.init();
     }
 
     try {
+      console.log('🔍 [PybaraAgent] recordPayment called with:', {
+        paymentId,
+        orderId,
+        siteUrl,
+        merchantPrincipal,
+        txId,
+        receivedAmount,
+        types: {
+          paymentId: typeof paymentId,
+          orderId: typeof orderId,
+          siteUrl: typeof siteUrl,
+          merchantPrincipal: typeof merchantPrincipal,
+          txId: typeof txId,
+          receivedAmount: typeof receivedAmount
+        }
+      });
+      
+      console.log('🔍 Converting merchantPrincipal to Principal object...');
       const merchantPrincipalObj = typeof merchantPrincipal === 'string' 
         ? Principal.fromText(merchantPrincipal) 
         : merchantPrincipal;
+      console.log('✅ Merchant principal converted:', merchantPrincipalObj.toText());
 
       const result = await this.actor.record_payment(
+        paymentId ? [BigInt(paymentId)] : [],  // Optional payment_id
         BigInt(orderId),
         siteUrl,
         merchantPrincipalObj,
@@ -310,7 +336,8 @@ export class PybaraAgent {
       if (result.ok) {
         return {
           tx_id: Number(result.ok.tx_id),
-          verified: result.ok.verified
+          verified: result.ok.verified,
+          payment_id: result.ok.payment_id ? Number(result.ok.payment_id) : undefined
         };
       } else {
         throw new Error(result.err || 'Failed to record payment');

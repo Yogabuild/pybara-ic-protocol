@@ -8,7 +8,7 @@
 export const idlFactory = ({ IDL }) => {
   const Result_1 = IDL.Variant({
     'err' : IDL.Text,
-    'ok' : IDL.Record({ 'tx_id' : IDL.Nat, 'verified' : IDL.Bool }),
+    'ok' : IDL.Record({ 'tx_id' : IDL.Nat, 'verified' : IDL.Bool, 'payment_id' : IDL.Nat }),
   });
   
   const ConfirmPaymentResult = IDL.Variant({
@@ -62,7 +62,7 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     // Payment lifecycle methods (v2 - all params optional for flexibility)
     'confirm_payment' : IDL.Func([IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat), IDL.Opt(IDL.Text), IDL.Opt(IDL.Principal)], [ConfirmPaymentResult], []),
-    'record_payment' : IDL.Func([IDL.Nat, IDL.Text, IDL.Principal, IDL.Nat, IDL.Nat], [Result_1], []),
+    'record_payment' : IDL.Func([IDL.Opt(IDL.Nat), IDL.Nat, IDL.Text, IDL.Principal, IDL.Nat, IDL.Nat], [Result_1], []),
     'get_payment' : IDL.Func([IDL.Nat], [IDL.Opt(Payment)], ['query']),
     'get_payment_by_order' : IDL.Func([IDL.Nat, IDL.Text, IDL.Principal], [IDL.Opt(Payment)], ['query']),
     'init_payment' : IDL.Func(
