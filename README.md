@@ -456,6 +456,13 @@ This is a core Pybara package. Changes here affect **all** platform integrations
 
 ---
 
+## 🌐 Community
+
+- Twitter: [@pybara_hq](https://twitter.com/pybara_hq)
+- Email: contact@pybara.com
+
+---
+
 ## 📄 License
 
 MIT - See [LICENSE](./LICENSE)
