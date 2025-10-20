@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2025-10-20
+
+### Added
+- 🌍 `convertMinimumToUSD(minAmount, token, tokenPrice)` - Convert smallest units → USD
+- 💱 `convertUSDToCurrency(usdAmount, targetCurrency, exchangeRate)` - Convert USD → any currency
+- 🎨 `formatCurrency(amount, currencyCode, locale)` - Format with locale (160+ currencies via Intl)
+- ✅ `checkOrderMeetsMinimum(orderTotal, minAmount, token, ...)` - Validate order totals across currencies
+- 🔢 `formatTokenBalance(balance, token, maxDecimals)` - Format token balances properly
+- 📐 `getTokenDecimals(token)` - Get decimal places for tokens
+- 📁 New `src/utils/currency.js` module with all currency utilities
+- 🌏 Direct imports available for all currency functions
+- 📝 [RELEASE_NOTES_v1.2.0.md](RELEASE_NOTES_v1.2.0.md) with comprehensive examples
+
+### Fixed
+- 🐛 USD minimum display bug in WooCommerce (was showing millions)
+- 🐛 Currency conversion logic strengthened for all currencies
+
+### Changed
+- 📦 Bundle size: 63.6KB ESM (was 57.8KB), 30.8KB CJS (was 29.3KB)
+- 📚 Updated README with currency utilities section
+- 🏗️ WooCommerce refactored to use protocol utilities
+
+### Why
+Global e-commerce readiness. These utilities enable multi-currency support for Chinese (CNY), European (EUR), and all global markets. Essential for ic-checkout standalone component and reduces duplication across platforms.
+
+---
+
 ## [1.1.0] - 2025-10-19
 
 ### Added

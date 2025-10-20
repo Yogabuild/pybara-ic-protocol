@@ -51,6 +51,16 @@ export {
 export { createLedgerActor } from './utils/ledger-actor.js';
 export { CurrencyFormatter, createFormatter } from './utils/currency-formatter.js';
 
+// Currency utilities (v1.2.0+)
+export {
+    convertMinimumToUSD,
+    convertUSDToCurrency,
+    formatCurrency,
+    checkOrderMeetsMinimum,
+    formatTokenBalance,
+    getTokenDecimals
+} from './utils/currency.js';
+
 /**
  * Default export - Main PybaraAgent class
  */

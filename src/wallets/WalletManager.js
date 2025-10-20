@@ -68,7 +68,6 @@ export class WalletManager {
             const wallet = this.getWallet(walletType);
             if (wallet) {
                 wallet.icon = iconUrl;
-                console.log(`✅ Updated ${wallet.name} icon: ${iconUrl}`);
             }
         }
     }

@@ -17,6 +17,7 @@ import { getLedgerCanisterId, LEDGER_IDS } from '../utils/ledger-config.js';
 import { checkBalance, checkSufficientBalance, checkMultipleBalances, formatBalance } from '../payment/balance-checker.js';
 import { idlFactory } from './canister-idl.js';
 import { createConfig } from './config.js';
+import * as CurrencyUtils from '../utils/currency.js';
 
 export class PybaraAgent {
   constructor(config = {}) {
@@ -654,6 +655,93 @@ export class PybaraAgent {
       console.error(`❌ Get minimum amount for ${token} failed:`, error);
       throw error;
     }
+  }
+
+  // ================================================================================
+  // Currency & Conversion Helpers (v1.2.0+)
+  // ================================================================================
+
+  /**
+   * Convert minimum amount from smallest units to USD
+   * @param {number|bigint} minAmount - Minimum in smallest units
+   * @param {string} token - Token symbol (ICP, ckBTC, etc.)
+   * @param {number} tokenPrice - Current token price in USD (optional, will fetch if not provided)
+   * @returns {Promise<number>} Minimum amount in USD
+   */
+  async convertMinimumToUSD(minAmount, token, tokenPrice = null) {
+    const price = tokenPrice || await this.getTokenPrice(token);
+    return CurrencyUtils.convertMinimumToUSD(minAmount, token, price);
+  }
+
+  /**
+   * Convert USD amount to target currency
+   * @param {number} usdAmount - Amount in USD
+   * @param {string} targetCurrency - Target currency code (EUR, GBP, CNY, etc.)
+   * @param {number} exchangeRate - Exchange rate from USD to target
+   * @returns {number} Amount in target currency
+   */
+  convertUSDToCurrency(usdAmount, targetCurrency, exchangeRate = 1.0) {
+    return CurrencyUtils.convertUSDToCurrency(usdAmount, targetCurrency, exchangeRate);
+  }
+
+  /**
+   * Format amount as currency using Intl.NumberFormat
+   * @param {number} amount - Amount to format
+   * @param {string} currencyCode - ISO currency code (USD, EUR, GBP, CNY, etc.)
+   * @param {string} locale - Locale for formatting (auto-detected if not provided)
+   * @returns {string} Formatted currency string
+   */
+  formatCurrency(amount, currencyCode = 'USD', locale = null) {
+    return CurrencyUtils.formatCurrency(amount, currencyCode, locale);
+  }
+
+  /**
+   * Check if order total meets minimum requirement for a token
+   * @param {number} orderTotal - Order total in display currency
+   * @param {number|bigint} minAmount - Minimum in smallest units
+   * @param {string} token - Token symbol
+   * @param {number} tokenPrice - Current token price in USD (optional, will fetch if not provided)
+   * @param {string} orderCurrency - Order currency code (USD, EUR, etc.)
+   * @param {number} exchangeRate - Exchange rate from USD to order currency
+   * @returns {Promise<object>} Result with meetsMinimum, minConverted, shortfall
+   */
+  async checkOrderMeetsMinimum(
+    orderTotal,
+    minAmount,
+    token,
+    tokenPrice = null,
+    orderCurrency = 'USD',
+    exchangeRate = 1.0
+  ) {
+    const price = tokenPrice || await this.getTokenPrice(token);
+    return CurrencyUtils.checkOrderMeetsMinimum(
+      orderTotal,
+      minAmount,
+      token,
+      price,
+      orderCurrency,
+      exchangeRate
+    );
+  }
+
+  /**
+   * Format token balance from smallest units to human-readable
+   * @param {bigint|number|string} balance - Balance in smallest units
+   * @param {string} token - Token symbol
+   * @param {number} maxDecimals - Maximum decimal places to show
+   * @returns {string} Formatted balance
+   */
+  formatTokenBalance(balance, token, maxDecimals = null) {
+    return CurrencyUtils.formatTokenBalance(balance, token, maxDecimals);
+  }
+
+  /**
+   * Get token decimal places
+   * @param {string} token - Token symbol
+   * @returns {number} Number of decimals
+   */
+  getTokenDecimals(token) {
+    return CurrencyUtils.getTokenDecimals(token);
   }
 }
 

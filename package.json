@@ -1,6 +1,6 @@
 {
   "name": "@yogabuild/pybara-ic-protocol",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Shared Internet Computer protocol integration for Pybara payment gateway - platform-agnostic",
   "author": "Yogabuild",
   "license": "MIT",

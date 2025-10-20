@@ -172,6 +172,71 @@ const minimum = await agent.getMinimumAmount('ckBTC');
 - Price displays (show real-time prices)
 - Balance checks (before initiating payment)
 
+### **Currency & Conversion Helpers** (v1.2.0+)
+
+These methods handle currency conversion and formatting for global e-commerce.
+
+```javascript
+import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
+
+const agent = new PybaraAgent(config);
+
+// 1. Convert minimum from smallest units to USD
+const minUSD = await agent.convertMinimumToUSD(1000000, 'ckUSDC', 1.00);
+// Returns: 1.00 (USD)
+
+// 2. Convert USD to target currency
+const eurAmount = agent.convertUSDToCurrency(10.00, 'EUR', 0.92);
+// Returns: 9.20
+
+// 3. Format currency for display
+const formatted = agent.formatCurrency(10.50, 'EUR', 'de-DE');
+// Returns: "10,50 €"
+
+// With Chinese Yuan
+const formatted = agent.formatCurrency(100, 'CNY', 'zh-CN');
+// Returns: "¥100.00"
+
+// 4. Check if order meets minimum
+const check = await agent.checkOrderMeetsMinimum(
+  50.00,      // order total
+  1000000,    // minimum in smallest units
+  'ckUSDC',   // token
+  1.00,       // token price (USD)
+  'EUR',      // order currency
+  0.92        // exchange rate (USD to EUR)
+);
+// Returns: { meetsMinimum: true, minUSD: 1.00, minConverted: 0.92, shortfall: 0 }
+
+// 5. Format token balance
+const formatted = agent.formatTokenBalance(50000000n, 'ckBTC', 8);
+// Returns: "0.50000000"
+
+// 6. Get token decimals
+const decimals = agent.getTokenDecimals('ckBTC');
+// Returns: 8
+```
+
+**Direct imports available:**
+```javascript
+import { 
+  convertMinimumToUSD, 
+  convertUSDToCurrency,
+  formatCurrency,
+  checkOrderMeetsMinimum 
+} from '@yogabuild/pybara-ic-protocol';
+
+// Use functions directly without agent instance
+const minUSD = convertMinimumToUSD(1000000, 'ckUSDC', 1.00);
+const formatted = formatCurrency(10.50, 'EUR', 'de-DE');
+```
+
+**Perfect for:**
+- Multi-currency e-commerce (WooCommerce, Shopify, etc.)
+- Standalone checkout components
+- Minimum order validation across currencies
+- Global localization (supports 160+ currencies via `Intl.NumberFormat`)
+
 ### **Wallet Module**
 
 ```javascript
@@ -471,9 +536,17 @@ MIT - See [LICENSE](./LICENSE)
 
 ## 🌟 Status
 
-**Version**: 1.1.0  
+**Version**: 1.2.0  
 **Used By**: WooCommerce, Shopify, ic-checkout  
 **Stability**: Production-ready
+
+**What's New in v1.2.0:**
+- 🌍 Added `convertMinimumToUSD()` - Convert minimums from smallest units to USD
+- 💱 Added `convertUSDToCurrency()` - Convert USD to any currency
+- 🎨 Added `formatCurrency()` - Format amounts with proper locale (supports 160+ currencies)
+- ✅ Added `checkOrderMeetsMinimum()` - Validate order totals across currencies
+- 🔢 Added `formatTokenBalance()` - Format token balances with proper decimals
+- 🎯 Ready for global e-commerce (CNY, EUR, GBP, etc.)
 
 **What's New in v1.1.0:**
 - ✨ Added `getAvailableTokens()` - Get list of supported tokens
