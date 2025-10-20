@@ -460,6 +460,7 @@ export class PybaraAgent {
       // Convert arrays to more convenient format
       const decimalsMap = {};
       const minimumsMap = {};
+      const transferFeesMap = {};
       
       config.decimals.forEach(([token, decimals]) => {
         decimalsMap[token] = Number(decimals);
@@ -469,10 +470,18 @@ export class PybaraAgent {
         minimumsMap[token] = minimum.toString();
       });
       
+      // transfer_fees is optional (may not exist in older canister versions)
+      if (config.transfer_fees && Array.isArray(config.transfer_fees)) {
+        config.transfer_fees.forEach(([token, fee]) => {
+          transferFeesMap[token] = fee.toString();
+        });
+      }
+      
       return {
         supported_tokens: config.supported_tokens,
         decimals: decimalsMap,
-        minimums: minimumsMap
+        minimums: minimumsMap,
+        transfer_fees: transferFeesMap
       };
     } catch (error) {
       console.error('❌ Get token config failed:', error);

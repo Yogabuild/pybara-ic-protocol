@@ -1,16 +1,16 @@
 {
-  "name": "@yogabuild/pybara-ic-protocol",
+  "name": "@yogabuild/pybara-sdk",
   "version": "1.2.0",
-  "description": "Shared Internet Computer protocol integration for Pybara payment gateway - platform-agnostic",
+  "description": "JavaScript SDK for Pybara payment gateway - platform-agnostic IC integration",
   "author": "Yogabuild",
   "license": "MIT",
   "type": "module",
-  "main": "dist/pybara-ic-protocol.js",
-  "module": "dist/pybara-ic-protocol.js",
+  "main": "dist/pybara-sdk.js",
+  "module": "dist/pybara-sdk.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/pybara-ic-protocol.js",
+      "import": "./dist/pybara-sdk.js",
       "types": "./dist/index.d.ts"
     },
     "./wallets": {
@@ -50,6 +50,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yogabuild/pybara-ic-protocol.git"
+    "url": "https://github.com/yogabuild/pybara-sdk.git"
   }
 }

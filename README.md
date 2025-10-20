@@ -1,12 +1,12 @@
-# 🦫 @yogabuild/pybara-ic-protocol
+# 🦫 @yogabuild/pybara-sdk
 
-[![npm version](https://img.shields.io/npm/v/@yogabuild/pybara-ic-protocol.svg)](https://www.npmjs.com/package/@yogabuild/pybara-ic-protocol)
-[![npm downloads](https://img.shields.io/npm/dm/@yogabuild/pybara-ic-protocol.svg)](https://www.npmjs.com/package/@yogabuild/pybara-ic-protocol)
+[![npm version](https://img.shields.io/npm/v/@yogabuild/pybara-sdk.svg)](https://www.npmjs.com/package/@yogabuild/pybara-sdk)
+[![npm downloads](https://img.shields.io/npm/dm/@yogabuild/pybara-sdk.svg)](https://www.npmjs.com/package/@yogabuild/pybara-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 **JavaScript SDK for Pybara payment gateway.** Connects to Pybara's Internet Computer backend to handle crypto payments for WooCommerce, Shopify, and custom integrations.
 
-**📦 npm:** https://www.npmjs.com/package/@yogabuild/pybara-ic-protocol
+**📦 npm:** https://www.npmjs.com/package/@yogabuild/pybara-sdk
 
 ---
 
@@ -33,7 +33,7 @@ This package contains all the **platform-agnostic** code for Pybara's Internet C
 ## 📦 Installation
 
 ```bash
-npm install @yogabuild/pybara-ic-protocol
+npm install @yogabuild/pybara-sdk
 ```
 
 ---
@@ -43,7 +43,7 @@ npm install @yogabuild/pybara-ic-protocol
 ### **1. Initialize IC Agent**
 
 ```javascript
-import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
 const agent = new PybaraAgent({
   canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai', // Pybara backend canister
@@ -78,7 +78,7 @@ console.log('Price Used:', result.priceUsed);
 ### **2. Connect Wallet**
 
 ```javascript
-import { WalletManager } from '@yogabuild/pybara-ic-protocol/wallets';
+import { WalletManager } from '@yogabuild/pybara-sdk/wallets';
 
 const walletManager = new WalletManager();
 
@@ -95,7 +95,7 @@ const balance = await walletManager.getBalance('ckBTC');
 ### **3. Execute Payment**
 
 ```javascript
-import { PaymentExecutor } from '@yogabuild/pybara-ic-protocol';
+import { PaymentExecutor } from '@yogabuild/pybara-sdk';
 
 const executor = new PaymentExecutor(agent, walletManager);
 
@@ -121,7 +121,7 @@ console.log('Platform TX:', result.platformTxId);
 ### **Core Module**
 
 ```javascript
-import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
 // Initialize agent
 const agent = new PybaraAgent(config);
@@ -148,7 +148,7 @@ await agent.getMinimumAmount(token);     // Get minimum order amount
 These methods make it easy to build checkout UIs and token pickers.
 
 ```javascript
-import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
 const agent = new PybaraAgent(config);
 
@@ -181,7 +181,7 @@ const minimum = await agent.getMinimumAmount('ckBTC');
 These methods handle currency conversion and formatting for global e-commerce.
 
 ```javascript
-import { PybaraAgent } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
 const agent = new PybaraAgent(config);
 
@@ -228,7 +228,7 @@ import {
   convertUSDToCurrency,
   formatCurrency,
   checkOrderMeetsMinimum 
-} from '@yogabuild/pybara-ic-protocol';
+} from '@yogabuild/pybara-sdk';
 
 // Use functions directly without agent instance
 const minUSD = convertMinimumToUSD(1000000, 'ckUSDC', 1.00);
@@ -248,7 +248,7 @@ import {
   WalletManager,
   OisyWalletAdapter,
   PlugWalletAdapter,
-} from '@yogabuild/pybara-ic-protocol/wallets';
+} from '@yogabuild/pybara-sdk/wallets';
 
 // Create wallet manager
 const manager = new WalletManager();
@@ -279,7 +279,7 @@ import {
   BalanceChecker,
   PriceCache,
   MinimumChecker,
-} from '@yogabuild/pybara-ic-protocol/payment';
+} from '@yogabuild/pybara-sdk/payment';
 
 // Check if user has sufficient balance
 const checker = new BalanceChecker(walletManager);
@@ -301,7 +301,7 @@ import {
   WalletSelector,
   PaymentProgress,
   TokenPicker,
-} from '@yogabuild/pybara-ic-protocol/ui';
+} from '@yogabuild/pybara-sdk/ui';
 
 // Render wallet selector
 const selector = new WalletSelector({
@@ -329,7 +329,7 @@ progress.complete('Payment successful!');
 
 ```javascript
 // woocommerce-pybara/assets/js/checkout.js
-import { PybaraAgent, WalletManager } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent, WalletManager } from '@yogabuild/pybara-sdk';
 
 const agent = new PybaraAgent({ /* config */ });
 const wallets = new WalletManager();
@@ -349,7 +349,7 @@ jQuery(document.body).on('checkout_place_order_wc_pybara', async function() {
 
 ```typescript
 // pybara-shopify/extensions/checkout/Checkout.tsx
-import { PybaraAgent, WalletManager } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent, WalletManager } from '@yogabuild/pybara-sdk';
 import { useEffect, useState } from 'react';
 
 export function PybaraCheckout() {
@@ -373,7 +373,7 @@ export function PybaraCheckout() {
 
 ```javascript
 // pybara-magento/view/frontend/web/js/view/payment/method-renderer/pybara.js
-import { PybaraAgent, WalletManager } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent, WalletManager } from '@yogabuild/pybara-sdk';
 
 define(['uiComponent'], function(Component) {
   return Component.extend({
@@ -421,7 +421,7 @@ const config = {
 ### **Custom Configuration**
 
 ```javascript
-import { PybaraAgent, config } from '@yogabuild/pybara-ic-protocol';
+import { PybaraAgent, config } from '@yogabuild/pybara-sdk';
 
 // Override defaults
 config.debug = true;
@@ -453,7 +453,7 @@ npm run test:e2e
 ## 📁 Package Structure
 
 ```
-@yogabuild/pybara-ic-protocol/
+@yogabuild/pybara-sdk/
 ├── src/
 │   ├── core/
 │   │   ├── canister-idl.js       # Candid interface
@@ -492,7 +492,7 @@ npm run test:e2e
 │       └── error-handler.js
 │
 ├── dist/                         # Compiled bundles
-│   ├── pybara-ic-protocol.js     # Full bundle
+│   ├── pybara-sdk.js     # Full bundle
 │   ├── pybara-wallets.js         # Wallets only
 │   └── pybara-ui.js              # UI only
 │
