@@ -51,5 +51,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/yogabuild/pybara-sdk.git"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

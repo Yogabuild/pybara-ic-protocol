@@ -38,7 +38,7 @@ export class NFIDWalletAdapter extends WalletAdapter {
         // Network configuration
         this.host = 'https://ic0.app';
         
-        console.log('✅ NFID Wallet Adapter initialized');
+        // NFID adapter initialized silently
     }
 
     /**

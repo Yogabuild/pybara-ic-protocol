@@ -22,7 +22,7 @@ export class WalletManager {
         }
         
         this.wallets.set(adapter.type, adapter);
-        console.log(`✅ Registered wallet: ${adapter.name} (${adapter.type})`);
+        // Wallet registered silently (reduce console noise)
     }
 
     /**

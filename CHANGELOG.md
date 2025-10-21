@@ -50,7 +50,7 @@ Global e-commerce readiness. These utilities enable multi-currency support for C
 - 📊 Updated STATUS.md with v1.1.0 milestones
 
 ### Why
-These methods simplify building checkout UIs and token pickers by providing clean, high-level APIs for common operations. Created specifically to support pybara-ic-checkout integration.
+These methods simplify building checkout UIs and token pickers by providing clean, high-level APIs for common operations. Created specifically to support pybara-checkout integration.
 
 ---
 
