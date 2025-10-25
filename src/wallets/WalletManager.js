@@ -162,12 +162,19 @@ export class WalletManager {
             return blockIndex;
             
         } catch (error) {
-            console.error(`❌ Transfer failed:`, error);
-            this.emit('error', { 
-                wallet: this.activeWallet.type, 
-                error,
-                action: 'transfer'
-            });
+            // Don't log user cancellations as errors (already logged by wallet adapter)
+            const isCancellation = error.message?.includes('cancel') || 
+                                 error.message?.includes('reject');
+            
+            if (!isCancellation) {
+                // Only emit error event for actual errors, not user cancellations
+                this.emit('error', { 
+                    wallet: this.activeWallet.type, 
+                    error,
+                    action: 'transfer'
+                });
+            }
+            
             throw error;
         }
     }

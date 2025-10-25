@@ -189,6 +189,55 @@ export class PybaraAgent {
   }
 
   /**
+   * Calculate payment amount without creating a payment record
+   * This should be called BEFORE wallet approval to get the amount to show in the wallet
+   * 
+   * @param {number} usdAmount - Amount in USD
+   * @param {string} token - Token symbol (ICP, ckBTC, etc)
+   * @returns {Promise<Object>} Payment calculation with expected_amount, price_usd, minimum_amount
+   */
+  async calculateAmount(usdAmount, token) {
+    if (!this.actor) {
+      await this.init();
+    }
+
+    try {
+      console.log(`🧮 [PybaraAgent] Calculating amount: $${usdAmount} in ${token}`);
+
+      const result = await this.actor.calculate_payment_amount(
+        parseFloat(usdAmount),
+        token
+      );
+
+      console.log('🔍 [PybaraAgent] Calculate result:', result);
+
+      // Handle Result<PaymentCalculation, Text>
+      if (result.ok) {
+        const calculation = result.ok;
+        console.log('🔍 [PybaraAgent] Calculation object:', calculation);
+        console.log('✅ Amount calculated');
+        console.log('   Token amount:', calculation.token_amount.toString());
+        console.log('   Price used:', calculation.price_used);
+        console.log('   USD amount:', calculation.usd_amount);
+        
+        return {
+          expected_amount: calculation.token_amount.toString(),
+          price_usd: calculation.price_used,
+          token: calculation.token
+        };
+      } else {
+        const error = result.err || 'Failed to calculate payment amount';
+        console.error('❌ Calculation failed:', error);
+        throw new Error(error);
+      }
+    } catch (error) {
+      console.error('❌ Calculate amount failed:', error);
+      console.error('   Error details:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Initialize payment on canister (fetch price & calculate amount)
    * 
    * @param {Object} params - Payment parameters

@@ -148,8 +148,6 @@ export class OisyWalletAdapter extends WalletAdapter {
             return Number(blockIndex);
             
         } catch (error) {
-            console.error('❌ Oisy transfer failed:', error);
-            
             // Cleanup signer on error
             if (this.signer) {
                 try {
@@ -159,16 +157,22 @@ export class OisyWalletAdapter extends WalletAdapter {
             }
             
             // Classify error for better user messages
-            if (error.message?.includes('insufficient')) {
-                throw this.createError(`Insufficient ${token} balance`);
-            }
-            if (error.message?.includes('canceled') || error.message?.includes('cancelled')) {
+            const isCancellation = error.message?.includes('canceled') || 
+                                 error.message?.includes('cancelled') ||
+                                 error.message?.includes('rejected');
+            
+            if (isCancellation) {
+                // User intentionally cancelled - this is not an error
+                console.log('ℹ️ [Oisy] User cancelled transaction');
                 throw this.createError('Transfer cancelled by user');
             }
-            if (error.message?.includes('rejected')) {
-                throw this.createError('Transfer rejected by user');
+            
+            if (error.message?.includes('insufficient')) {
+                console.error('❌ Oisy transfer failed:', error);
+                throw this.createError(`Insufficient ${token} balance`);
             }
             
+            console.error('❌ Oisy transfer failed:', error);
             throw this.createError(`Transfer failed: ${error.message}`);
         }
     }
