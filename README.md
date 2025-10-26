@@ -524,26 +524,11 @@ MIT - See [LICENSE](./LICENSE)
 
 ## 🌟 Status
 
-**Version**: 1.2.0  
-**Used By**: WooCommerce, Shopify, ic-checkout  
-**Stability**: Production-ready
-
-**What's New in v1.2.0:**
-- 🌍 Added `convertMinimumToUSD()` - Convert minimums from smallest units to USD
-- 💱 Added `convertUSDToCurrency()` - Convert USD to any currency
-- 🎨 Added `formatCurrency()` - Format amounts with proper locale (supports 160+ currencies)
-- ✅ Added `checkOrderMeetsMinimum()` - Validate order totals across currencies
-- 🔢 Added `formatTokenBalance()` - Format token balances with proper decimals
-- 🎯 Ready for global e-commerce (CNY, EUR, GBP, etc.)
-
-**What's New in v1.1.0:**
-- ✨ Added `getAvailableTokens()` - Get list of supported tokens
-- ✨ Added `getBalance(token)` - Query user balance for specific token
-- ✨ Added `getTokenPrice(token)` - Fetch current token price
-- ✨ Added `getMinimumAmount(token)` - Get minimum order amount
-- 🎯 Perfect for building checkout UIs and token pickers  
+**Version**: 2.1.0  
+**Stability**: Production-ready  
+**License**: MIT
 
 ---
 
-**Built with 🦫 by Pybara**
+**Built by [Yogabuild](https://github.com/yogabuild) | ICP Dev House**
 
