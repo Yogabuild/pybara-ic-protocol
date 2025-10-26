@@ -120,26 +120,35 @@ await agent.getMinimumAmount(token);
 
 ### Payment Calculator (Platform-Agnostic)
 
+All payment math in one place - used by WooCommerce, Shopify, and future platforms.
+
 ```javascript
 import { PaymentCalculator } from '@yogabuild/pybara-sdk';
 
-// Calculate payment for all tokens
+// Calculate for all tokens (checks minimums, balances, etc.)
 const calculations = PaymentCalculator.calculateAllTokens(
-  usdAmount,
-  priceData,
-  tokenConfig,
-  balances
+  usdAmount,       // Order total
+  priceData,       // From getTokenPrices()
+  tokenConfig,     // From getTokenConfig()
+  balances         // User's token balances
 );
 
-// Find best token for user
+// Each calculation includes:
+// - requiredAmount (BigInt)
+// - isPayable (boolean)
+// - hasSufficientBalance
+// - isBelowMinimum
+// - and more...
+
+// Find best token
 const bestToken = PaymentCalculator.findBestToken(calculations);
 
-// Format amounts
+// Format for display
 PaymentCalculator.formatTokenAmount(amount, decimals);
 PaymentCalculator.formatUSD(usdAmount);
 ```
 
-See [SDK_PAYMENT_CALCULATOR.md](./SDK_PAYMENT_CALCULATOR.md) for full documentation.
+**Why it exists:** Ensures all platforms use identical payment logic - no duplication, fix once works everywhere.
 
 ### Wallet Adapters
 
