@@ -145,10 +145,10 @@ export class PybaraAgent {
   }
 
   /**
-   * Execute payment via connected wallet
-   * This is the main payment execution method
+   * Send customer payment to Pybara Core (payment gateway backend)
+   * This transfers tokens from the customer's wallet to Pybara's payment gateway
    */
-  async executePayment(amountE8s, recipientPrincipal, token) {
+  async sendCustomerPaymentToPybaraCore(amountE8s, pybaraCorePrincipal, token) {
     if (!this.isWalletConnected()) {
       throw new Error('No wallet connected. Please connect a wallet first.');
     }
@@ -157,7 +157,7 @@ export class PybaraAgent {
     const ledgerCanisterId = getLedgerCanisterId(token);
     
     if (this.debug) {
-      console.log(`💳 Sending ${formatBalance(amountE8s, token)} to ${recipientPrincipal}...`);
+      console.log(`💳 Customer paying: ${formatBalance(amountE8s, token)} to Pybara Core ${pybaraCorePrincipal}`);
     }
     
     // Check balance
@@ -175,18 +175,19 @@ export class PybaraAgent {
     
     // Execute transfer
     const blockIndex = await this.walletManager.transfer({
-      to: recipientPrincipal,
+      to: pybaraCorePrincipal,
       amount: amountE8s,
       ledgerCanisterId: ledgerCanisterId,
       token: token
     });
     
     if (this.debug) {
-      console.log(`✅ Transfer complete (Block: ${blockIndex})`);
+      console.log(`✅ Customer payment sent to Pybara Core (Block: ${blockIndex})`);
     }
     
     return { blockIndex };
   }
+
 
   /**
    * Calculate payment amount without creating a payment record
@@ -238,7 +239,8 @@ export class PybaraAgent {
   }
 
   /**
-   * Initialize payment on canister (fetch price & calculate amount)
+   * Create payment record in canister database
+   * This calculates the amount and creates a "pending" payment record
    * 
    * @param {Object} params - Payment parameters
    * @param {number} params.orderId - Order ID
@@ -251,7 +253,7 @@ export class PybaraAgent {
    * @param {string|Principal} [params.userPrincipal] - User's principal (optional)
    * @param {string} [params.wallet] - Wallet name (optional, e.g., "Oisy", "Plug")
    */
-  async initPayment(params) {
+  async createPaymentRecord(params) {
     if (!this.actor) {
       await this.init();
     }
@@ -278,7 +280,7 @@ export class PybaraAgent {
         ? (typeof userPrincipal === 'string' ? Principal.fromText(userPrincipal) : userPrincipal)
         : null;
       
-      const result = await this.actor.init_payment(
+      const result = await this.actor.create_payment_record(
         BigInt(orderId),
         siteUrl,
         siteName,
@@ -295,7 +297,9 @@ export class PybaraAgent {
         // New format: Result<PaymentInit, Text>
         const payment = result.ok;
         if (this.debug) {
-          console.log('✅ Payment initialized');
+          console.log('✅ Payment record created in database');
+          console.log('   Payment ID:', Number(payment.payment_id));
+          console.log('   Status: pending');
           console.log('   Expected amount:', payment.expected_amount.toString());
           console.log('   Price used:', payment.price_usd);
         }
@@ -307,14 +311,15 @@ export class PybaraAgent {
           merchant_principal: payment.merchant_principal
         };
       } else if (result.status === 'success' && result.expected_amount && result.expected_amount.length > 0) {
-        // Format: {status, expected_amount, error, payment_url, price_used, payment_id?}
+        // Legacy response format (backwards compatibility with older backend)
         const hasPaymentId = result.payment_id && result.payment_id.length > 0;
         if (this.debug) {
-          console.log(`✅ Payment initialized${hasPaymentId ? ' (v2)' : ' (v1)'}`);
+          console.log('✅ Payment record created in database');
           console.log('   Expected amount:', result.expected_amount[0].toString());
           console.log('   Price used:', result.price_used[0]);
           if (hasPaymentId) {
             console.log('   Payment ID:', result.payment_id[0].toString());
+            console.log('   Status: pending');
           }
         }
         
@@ -335,8 +340,10 @@ export class PybaraAgent {
     }
   }
 
+
   /**
-   * Record payment on canister (after successful transfer)
+   * Verify and record customer payment on-chain
+   * Verifies the block transfer actually happened and tokens are in Pybara Core
    * @param {number} paymentId - Optional payment ID for direct lookup (preferred)
    * @param {number} orderId - Order ID (fallback if paymentId not provided)
    * @param {string} siteUrl - Site URL (fallback if paymentId not provided)
@@ -344,36 +351,23 @@ export class PybaraAgent {
    * @param {number} txId - Transaction ID (block index)
    * @param {bigint} receivedAmount - Amount received in smallest units
    */
-  async recordPayment(paymentId, orderId, siteUrl, merchantPrincipal, txId, receivedAmount) {
+  async verifyAndRecordCustomerPayment(paymentId, orderId, siteUrl, merchantPrincipal, txId, receivedAmount) {
     if (!this.actor) {
       await this.init();
     }
 
     try {
-      console.log('🔍 [PybaraAgent] recordPayment called with:', {
-        paymentId,
-        orderId,
-        siteUrl,
-        merchantPrincipal,
-        txId,
-        receivedAmount,
-        types: {
-          paymentId: typeof paymentId,
-          orderId: typeof orderId,
-          siteUrl: typeof siteUrl,
-          merchantPrincipal: typeof merchantPrincipal,
-          txId: typeof txId,
-          receivedAmount: typeof receivedAmount
-        }
-      });
+      if (this.debug) {
+        console.log('🔍 Verifying customer payment on blockchain (Block:', txId + ')...');
+        console.log('   Payment ID:', paymentId);
+        console.log('   Expected amount:', receivedAmount.toString());
+      }
       
-      console.log('🔍 Converting merchantPrincipal to Principal object...');
       const merchantPrincipalObj = typeof merchantPrincipal === 'string' 
         ? Principal.fromText(merchantPrincipal) 
         : merchantPrincipal;
-      console.log('✅ Merchant principal converted:', merchantPrincipalObj.toText());
 
-      const result = await this.actor.record_payment(
+      const result = await this.actor.verify_and_record_customer_payment(
         paymentId ? [BigInt(paymentId)] : [],  // Optional payment_id
         BigInt(orderId),
         siteUrl,
@@ -383,25 +377,32 @@ export class PybaraAgent {
       );
 
       if (result.ok) {
+        if (this.debug) {
+          console.log('✅ Customer payment verified on blockchain');
+          console.log('   Tokens confirmed in Pybara Core');
+          console.log('   Payment status: recorded');
+        }
         return {
           tx_id: Number(result.ok.tx_id),
           verified: result.ok.verified,
           payment_id: result.ok.payment_id ? Number(result.ok.payment_id) : undefined
         };
       } else {
-        throw new Error(result.err || 'Failed to record payment');
+        throw new Error(result.err || 'Failed to verify customer payment');
       }
     } catch (error) {
-      console.error('❌ Record payment failed:', error);
+      console.error('❌ Customer payment verification failed:', error);
       throw error;
     }
   }
 
+
   /**
-   * Confirm payment and execute dual transfer (99% merchant + 1% platform)
-   * Called after user sends tokens to canister
+   * Execute payout from Pybara Core to merchant and platform
+   * Transfers 99% to merchant and 1% platform fee from Pybara Core
+   * Called after customer payment is verified
    */
-  async confirmPayment(paymentId, orderId, siteUrl, merchantPrincipalText) {
+  async executePayoutToMerchant(paymentId, orderId, siteUrl, merchantPrincipalText) {
     if (!this.actor) {
       await this.init();
     }
@@ -409,9 +410,15 @@ export class PybaraAgent {
     try {
       const merchantPrincipal = Principal.fromText(merchantPrincipalText);
 
-      // v2 backend: confirm_payment(payment_id?, order_id?, site_url?, merchant?)
-      // Prefer payment_id if available (more reliable), fallback to composite key
-      const result = await this.actor.confirm_payment(
+      if (this.debug) {
+        console.log('💸 Pybara Core executing payout: 99% to merchant, 1% platform fee');
+        console.log(`   Payment ID: ${paymentId}`);
+        console.log(`   Merchant: ${merchantPrincipalText}`);
+      }
+
+      // Backend: execute_payout_to_merchant(payment_id?, order_id?, site_url?, merchant?)
+      // This executes the Pybara Core → merchant and Pybara Core → platform transfers
+      const result = await this.actor.execute_payout_to_merchant(
         paymentId ? [BigInt(paymentId)] : [],
         orderId ? [BigInt(orderId)] : [],
         siteUrl ? [siteUrl] : [],
@@ -420,20 +427,23 @@ export class PybaraAgent {
 
       if (result.ok) {
         if (this.debug) {
-          console.log(`✅ Payment complete (Merchant: ${result.ok.merchant_tx}, Platform: ${result.ok.platform_tx})`);
+          console.log(`✅ Merchant payout complete (Block: ${result.ok.merchant_tx})`);
+          console.log(`✅ Platform fee complete (Block: ${result.ok.platform_tx})`);
+          console.log('✅ Payment flow complete');
         }
         return {
           merchant_tx_id: Number(result.ok.merchant_tx),
           platform_tx_id: Number(result.ok.platform_tx)
         };
       } else {
-        throw new Error(result.err || 'Failed to confirm payment');
+        throw new Error(result.err || 'Failed to execute payout');
       }
     } catch (error) {
-      console.error('❌ Confirm payment failed:', error);
+      console.error('❌ Payout execution failed:', error);
       throw error;
     }
   }
+
 
   /**
    * Get payment status from canister
@@ -485,10 +495,19 @@ export class PybaraAgent {
     try {
       const prices = await this.actor.get_token_prices();
       // Backend returns [(Text, Float)] which becomes [[token, price], ...] in JS
-      return prices.map(([token, price]) => ({
+      const priceList = prices.map(([token, price]) => ({
         token,
         price
       }));
+      
+      if (this.debug) {
+        console.log('💵 Current Token Prices:');
+        priceList.forEach(({ token, price }) => {
+          console.log(`   ${token}: $${price.toFixed(6)}`);
+        });
+      }
+      
+      return priceList;
     } catch (error) {
       console.error('❌ Get token prices failed:', error);
       throw error;
@@ -524,6 +543,38 @@ export class PybaraAgent {
         config.transfer_fees.forEach(([token, fee]) => {
           transferFeesMap[token] = fee.toString();
         });
+      }
+      
+      // Debug: Log minimum amounts for each token with USD equivalent
+      if (this.debug) {
+        console.log('📊 Token Minimum Amounts:');
+        
+        // Fetch prices to show USD equivalents
+        try {
+          const prices = await this.actor.get_token_prices();
+          const priceMap = {};
+          prices.forEach(([token, price]) => {
+            priceMap[token] = price;
+          });
+          
+          config.supported_tokens.forEach(token => {
+            const minE8s = minimumsMap[token];
+            const decimals = decimalsMap[token] || 8;
+            const minTokens = Number(minE8s) / Math.pow(10, decimals);
+            const price = priceMap[token] || 0;
+            const minUSD = minTokens * price;
+            
+            console.log(`   ${token}: ${minTokens.toFixed(decimals)} ${token} ≈ $${minUSD.toFixed(2)} USD`);
+          });
+        } catch (error) {
+          // Fallback: show without USD if price fetch fails
+          config.supported_tokens.forEach(token => {
+            const minE8s = minimumsMap[token];
+            const decimals = decimalsMap[token] || 8;
+            const minTokens = Number(minE8s) / Math.pow(10, decimals);
+            console.log(`   ${token}: ${minTokens.toFixed(decimals)} ${token}`);
+          });
+        }
       }
       
       return {
@@ -731,6 +782,12 @@ export class PybaraAgent {
       
       // Calculate USD equivalent
       const minimumUsd = minimumTokens * price;
+      
+      if (this.debug) {
+        console.log(`💰 Minimum for ${token}:`);
+        console.log(`   Token: ${minimumTokens.toFixed(decimals)} ${token}`);
+        console.log(`   USD: $${minimumUsd.toFixed(2)} (at $${price.toFixed(2)}/${token})`);
+      }
       
       return {
         usd: minimumUsd,

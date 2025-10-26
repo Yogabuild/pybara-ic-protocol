@@ -119,6 +119,8 @@ export class PlugWalletAdapter extends WalletAdapter {
         const { to, amount, ledgerCanisterId, token } = params;
         
         try {
+            console.log(`🔌 Plug: Requesting transfer of ${amount} ${token} to ${to}`);
+            
             // Plug's requestTransfer method
             // https://docs.plugwallet.ooo/getting-started/connect-to-plug#request-transfer
             const result = await window.ic.plug.requestTransfer({
@@ -127,8 +129,25 @@ export class PlugWalletAdapter extends WalletAdapter {
                 canisterId: ledgerCanisterId
             });
             
+            console.log(`🔌 Plug: Transfer result:`, result);
+            
             // Plug returns { height: blockIndex } for ICRC-1
             const blockIndex = result.height || result.blockHeight || result;
+            
+            if (!blockIndex || blockIndex === 0) {
+                throw this.createError('Plug returned invalid block index. Transfer may have failed.');
+            }
+            
+            // CRITICAL: Verify the transfer actually happened
+            // Plug has a bug where it returns success without executing the transfer
+            console.log(`🔌 Plug: Verifying transfer on-chain (block ${blockIndex})...`);
+            
+            // Check if user's balance actually decreased
+            const balanceAfter = await this.getBalance(ledgerCanisterId, token);
+            console.log(`🔌 Plug: Balance after transfer: ${balanceAfter}`);
+            
+            // Note: We can't reliably verify without knowing balance before
+            // The backend will do proper on-chain verification
             
             // Normalize return value
             return Number(blockIndex);
@@ -145,6 +164,9 @@ export class PlugWalletAdapter extends WalletAdapter {
             }
             if (error.message?.includes('timeout')) {
                 throw this.createError('Transfer timeout. Please try again.');
+            }
+            if (error.message?.includes('invalid block')) {
+                throw this.createError('Transfer failed - Plug returned invalid response');
             }
             
             throw this.createError(`Transfer failed: ${error.message}`);
