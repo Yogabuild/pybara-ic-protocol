@@ -399,50 +399,26 @@ export class PybaraAgent {
 
 
   /**
+   * @deprecated Since backend v2.1 - Payout is now AUTO-EXECUTED after payment verification
+   * This function is kept for backwards compatibility but is no longer needed
+   * The backend automatically executes the payout after verifyAndRecordCustomerPayment succeeds
+   * 
    * Execute payout from Pybara Core to merchant and platform
    * Transfers 99% to merchant and 1% platform fee from Pybara Core
-   * Called after customer payment is verified
+   * 
+   * @returns {Promise} Resolves immediately (no-op)
    */
   async executePayoutToMerchant(paymentId, orderId, siteUrl, merchantPrincipalText) {
-    if (!this.actor) {
-      await this.init();
+    // NO-OP: Payout is now auto-executed by backend after verification
+    // Keeping function for backwards compatibility to avoid breaking existing integrations
+    if (this.debug) {
+      console.log('ℹ️  executePayoutToMerchant is deprecated - payout auto-executed by backend');
     }
-
-    try {
-      const merchantPrincipal = Principal.fromText(merchantPrincipalText);
-
-      if (this.debug) {
-        console.log('💸 Pybara Core executing payout: 99% to merchant, 1% platform fee');
-        console.log(`   Payment ID: ${paymentId}`);
-        console.log(`   Merchant: ${merchantPrincipalText}`);
-      }
-
-      // Backend: execute_payout_to_merchant(payment_id?, order_id?, site_url?, merchant?)
-      // This executes the Pybara Core → merchant and Pybara Core → platform transfers
-      const result = await this.actor.execute_payout_to_merchant(
-        paymentId ? [BigInt(paymentId)] : [],
-        orderId ? [BigInt(orderId)] : [],
-        siteUrl ? [siteUrl] : [],
-        merchantPrincipal ? [merchantPrincipal] : []
-      );
-
-      if (result.ok) {
-        if (this.debug) {
-          console.log(`✅ Merchant payout complete (Block: ${result.ok.merchant_tx})`);
-          console.log(`✅ Platform fee complete (Block: ${result.ok.platform_tx})`);
-          console.log('✅ Payment flow complete');
-        }
-        return {
-          merchant_tx_id: Number(result.ok.merchant_tx),
-          platform_tx_id: Number(result.ok.platform_tx)
-        };
-      } else {
-        throw new Error(result.err || 'Failed to execute payout');
-      }
-    } catch (error) {
-      console.error('❌ Payout execution failed:', error);
-      throw error;
-    }
+    return { 
+      merchant_tx_id: null, 
+      platform_tx_id: null,
+      note: 'Auto-executed by backend after verification'
+    };
   }
 
 

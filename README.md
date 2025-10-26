@@ -58,7 +58,8 @@ const payment = await agent.createPaymentRecord({
   wallet: 'Oisy'
 });
 
-// Verify customer payment on-chain
+// Verify customer payment on-chain and auto-execute payout
+// Payout (99% merchant, 1% platform) happens automatically!
 await agent.verifyAndRecordCustomerPayment(
   payment.payment_id,
   12345,
@@ -66,14 +67,6 @@ await agent.verifyAndRecordCustomerPayment(
   'merchant-principal-id',
   blockIndex,
   calc.expected_amount
-);
-
-// Execute payout to merchant (99% merchant, 1% platform fee)
-await agent.executePayoutToMerchant(
-  payment.payment_id,
-  12345,
-  'https://mystore.com',
-  'merchant-principal-id'
 );
 ```
 
@@ -99,7 +92,8 @@ await agent.calculateAmount(usdAmount, token);
 await agent.sendCustomerPaymentToPybaraCore(amountE8s, pybaraCorePrincipal, token);
 await agent.createPaymentRecord(params);
 await agent.verifyAndRecordCustomerPayment(paymentId, orderId, siteUrl, merchantPrincipal, txId, receivedAmount);
-await agent.executePayoutToMerchant(paymentId, orderId, siteUrl, merchantPrincipal);
+// ✅ Payout auto-executes after verification (99% merchant, 1% platform)
+// executePayoutToMerchant is deprecated - no longer needed
 
 // Query
 await agent.getPayment(paymentId);
