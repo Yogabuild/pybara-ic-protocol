@@ -1,8 +1,9 @@
 /**
- * Currency Utilities for Pybara
+ * Currency Logic for Pybara
  * 
- * Handles currency conversion and formatting across all platforms
- * Platform-agnostic, works with any e-commerce system or standalone
+ * Handles currency conversion, calculation, and validation logic.
+ * For formatting, use CurrencyFormatter from currency-formatter.js
+ * Platform-agnostic, works with any e-commerce system or standalone.
  */
 
 /**
@@ -56,40 +57,7 @@ export function convertUSDToCurrency(usdAmount, targetCurrency, exchangeRate = 1
     return usdAmount * exchangeRate;
 }
 
-/**
- * Format amount as currency using Intl.NumberFormat
- * @param {number} amount - Amount to format
- * @param {string} currencyCode - ISO currency code (USD, EUR, GBP, CNY, etc.)
- * @param {string} locale - Locale for formatting (e.g., 'en-US', 'zh-CN')
- * @returns {string} Formatted currency string
- */
-export function formatCurrency(amount, currencyCode = 'USD', locale = null) {
-    // Auto-detect locale from browser if not provided
-    const useLocale = locale || navigator.language || 'en-US';
-    
-    try {
-        const formatter = new Intl.NumberFormat(useLocale, {
-            style: 'currency',
-            currency: currencyCode,
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        
-        return formatter.format(amount);
-    } catch (error) {
-        // Fallback if currency not supported
-        console.warn(`Currency ${currencyCode} not supported by Intl, using fallback`);
-        
-        // Simple fallback with common symbols
-        const symbols = {
-            'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥',
-            'CNY': '¥', 'INR': '₹', 'AUD': 'A$', 'CAD': 'C$'
-        };
-        
-        const symbol = symbols[currencyCode] || currencyCode + ' ';
-        return `${symbol}${amount.toFixed(2)}`;
-    }
-}
+// Note: For currency formatting, use CurrencyFormatter from currency-formatter.js
 
 /**
  * Check if order total meets minimum requirement for a token

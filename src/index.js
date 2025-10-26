@@ -25,7 +25,7 @@ export {
 } from './core/config.js';
 
 // Wallet exports
-export { WalletManager } from './wallets/WalletManager.js';
+export { WalletManager } from './wallets/_WalletManager.js';
 export { WalletAdapter } from './wallets/BaseWalletAdapter.js';
 export { OisyWalletAdapter } from './wallets/OisyWalletAdapter.js';
 export { PlugWalletAdapter } from './wallets/PlugWalletAdapter.js';
@@ -38,8 +38,8 @@ export {
     checkSufficientBalance,
     generateInsufficientFundsMessage,
     checkMultipleBalances
-} from './payment/balance-checker.js';
-export { PriceCache, startPriceCache } from './payment/price-cache.js';
+} from './utils/balance-checker.js';
+export { PriceCache, startPriceCache } from './utils/price-cache.js';
 
 // Utilities
 export {
@@ -55,11 +55,10 @@ export { CurrencyFormatter, createFormatter } from './utils/currency-formatter.j
 export {
     convertMinimumToUSD,
     convertUSDToCurrency,
-    formatCurrency,
     checkOrderMeetsMinimum,
     formatTokenBalance,
     getTokenDecimals
-} from './utils/currency.js';
+} from './utils/currency-logic.js';
 
 /**
  * Default export - Main PybaraAgent class

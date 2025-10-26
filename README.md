@@ -456,45 +456,29 @@ npm run test:e2e
 @yogabuild/pybara-sdk/
 ├── src/
 │   ├── core/
-│   │   ├── canister-idl.js       # Candid interface
-│   │   ├── ic-agent.js           # IC communication
-│   │   └── payment-config.js     # Configuration
+│   │   ├── PybaraAgent.js        # Main payment agent
+│   │   ├── canister-idl.js       # Candid interface (IDL)
+│   │   └── config.js             # Configuration & defaults
 │   │
 │   ├── wallets/
-│   │   ├── base/
-│   │   │   └── WalletAdapter.js
-│   │   ├── oisy/
-│   │   │   └── OisyWalletAdapter.js
-│   │   ├── plug/
-│   │   │   └── PlugWalletAdapter.js
-│   │   ├── nfid/
-│   │   │   └── NFIDWalletAdapter.js
-│   │   ├── stoic/
-│   │   │   └── StoicWalletAdapter.js
-│   │   ├── bitfinity/
-│   │   │   └── BitfinityWalletAdapter.js
-│   │   └── WalletManager.js
+│   │   ├── _WalletManager.js     # Wallet orchestrator
+│   │   ├── BaseWalletAdapter.js  # Base adapter class
+│   │   ├── OisyWalletAdapter.js  # Oisy integration
+│   │   ├── PlugWalletAdapter.js  # Plug integration
+│   │   └── NFIDWalletAdapter.js  # NFID integration
 │   │
-│   ├── payment/
-│   │   ├── balance-checker.js
-│   │   ├── price-cache.js
-│   │   ├── minimum-checker.js
-│   │   └── payment-executor.js
+│   ├── utils/
+│   │   ├── balance-checker.js    # Token balance queries
+│   │   ├── currency-formatter.js # Currency display
+│   │   ├── currency-logic.js     # Currency calculations
+│   │   ├── ledger-actor.js       # Ledger actor creation
+│   │   ├── ledger-config.js      # Ledger configuration
+│   │   └── price-cache.js        # Token price caching
 │   │
-│   ├── ui/
-│   │   ├── WalletSelector.js
-│   │   ├── PaymentProgress.js
-│   │   └── TokenPicker.js
-│   │
-│   └── utils/
-│       ├── currency-formatter.js
-│       ├── ledger-config.js
-│       └── error-handler.js
+│   └── index.js                  # Public API exports
 │
 ├── dist/                         # Compiled bundles
-│   ├── pybara-sdk.js     # Full bundle
-│   ├── pybara-wallets.js         # Wallets only
-│   └── pybara-ui.js              # UI only
+│   └── pybara-sdk.js             # Full bundle
 │
 ├── package.json
 ├── vite.config.js

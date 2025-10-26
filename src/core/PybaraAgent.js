@@ -9,15 +9,16 @@
 
 import { HttpAgent, Actor } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { WalletManager } from '../wallets/WalletManager.js';
+import { WalletManager } from '../wallets/_WalletManager.js';
 import { OisyWalletAdapter } from '../wallets/OisyWalletAdapter.js';
 import { PlugWalletAdapter } from '../wallets/PlugWalletAdapter.js';
 import { NFIDWalletAdapter } from '../wallets/NFIDWalletAdapter.js';
 import { getLedgerCanisterId, LEDGER_IDS } from '../utils/ledger-config.js';
-import { checkBalance, checkSufficientBalance, checkMultipleBalances, formatBalance } from '../payment/balance-checker.js';
+import { checkBalance, checkSufficientBalance, checkMultipleBalances, formatBalance } from '../utils/balance-checker.js';
 import { idlFactory } from './canister-idl.js';
 import { createConfig } from './config.js';
-import * as CurrencyUtils from '../utils/currency.js';
+import * as CurrencyUtils from '../utils/currency-logic.js';
+import { CurrencyFormatter } from '../utils/currency-formatter.js';
 
 export class PybaraAgent {
   constructor(config = {}) {
@@ -834,7 +835,8 @@ export class PybaraAgent {
    * @returns {string} Formatted currency string
    */
   formatCurrency(amount, currencyCode = 'USD', locale = null) {
-    return CurrencyUtils.formatCurrency(amount, currencyCode, locale);
+    const formatter = new CurrencyFormatter(locale, currencyCode);
+    return formatter.format(amount, currencyCode, locale);
   }
 
   /**
