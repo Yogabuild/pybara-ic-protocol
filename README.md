@@ -118,6 +118,29 @@ await agent.getTokenPrice(token);
 await agent.getMinimumAmount(token);
 ```
 
+### Payment Calculator (Platform-Agnostic)
+
+```javascript
+import { PaymentCalculator } from '@yogabuild/pybara-sdk';
+
+// Calculate payment for all tokens
+const calculations = PaymentCalculator.calculateAllTokens(
+  usdAmount,
+  priceData,
+  tokenConfig,
+  balances
+);
+
+// Find best token for user
+const bestToken = PaymentCalculator.findBestToken(calculations);
+
+// Format amounts
+PaymentCalculator.formatTokenAmount(amount, decimals);
+PaymentCalculator.formatUSD(usdAmount);
+```
+
+See [SDK_PAYMENT_CALCULATOR.md](./SDK_PAYMENT_CALCULATOR.md) for full documentation.
+
 ### Wallet Adapters
 
 ```javascript

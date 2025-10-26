@@ -15,8 +15,8 @@ import { AuthClient } from '@dfinity/auth-client';
 import { HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { WalletAdapter } from './BaseWalletAdapter.js';
-import { getLedgerCanisterId } from '../../utils/ledger-config.js';
-import { createLedgerActor } from '../../utils/ledger-actor.js';
+import { getLedgerCanisterId } from '../utils/ledger-config.js';
+import { createLedgerActor } from '../utils/ledger-actor.js';
 
 export class NFIDWalletAdapter extends WalletAdapter {
     constructor() {

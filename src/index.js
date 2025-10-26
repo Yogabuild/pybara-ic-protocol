@@ -40,6 +40,7 @@ export {
     checkMultipleBalances
 } from './utils/balance-checker.js';
 export { PriceCache, startPriceCache } from './utils/price-cache.js';
+export { PaymentCalculator } from './utils/payment-calculator.js';
 
 // Utilities
 export {
