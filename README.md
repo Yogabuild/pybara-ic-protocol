@@ -1,36 +1,16 @@
-# 🦫 @yogabuild/pybara-sdk
+# @yogabuild/pybara-sdk
 
 [![npm version](https://img.shields.io/npm/v/@yogabuild/pybara-sdk.svg)](https://www.npmjs.com/package/@yogabuild/pybara-sdk)
-[![npm downloads](https://img.shields.io/npm/dm/@yogabuild/pybara-sdk.svg)](https://www.npmjs.com/package/@yogabuild/pybara-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-**JavaScript SDK for Pybara payment gateway.** Connects to Pybara's Internet Computer backend to handle crypto payments for WooCommerce, Shopify, and custom integrations.
+**JavaScript SDK for Pybara crypto payment gateway.** Platform-agnostic Internet Computer integration for e-commerce.
 
-**📦 npm:** https://www.npmjs.com/package/@yogabuild/pybara-sdk
-
----
-
-## 🎯 Purpose
-
-This package contains all the **platform-agnostic** code for Pybara's Internet Computer integration:
-
-- ✅ IC Canister communication
-- ✅ Wallet adapters (Oisy, Plug, NFID, Stoic, Bitfinity)
-- ✅ Payment lifecycle management
-- ✅ Token balance checking
-- ✅ Price fetching & caching
-- ✅ UI components (vanilla JS)
-
-**Used by:**
-- `pybara-woocommerce` (PHP/WordPress)
-- `pybara-shopify` (Node.js/Remix)
-- `pybara-magento` (PHP)
-- `pybara-prestashop` (PHP)
-- Future integrations...
+**Supports:** ICP, ckBTC, ckETH, ckUSDC, ckUSDT  
+**Wallets:** Oisy, Plug, NFID
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install @yogabuild/pybara-sdk
@@ -38,419 +18,239 @@ npm install @yogabuild/pybara-sdk
 
 ---
 
-## 🚀 Quick Start
-
-### **1. Initialize IC Agent**
-
-```javascript
-import { PybaraAgent } from '@yogabuild/pybara-sdk';
-
-const agent = new PybaraAgent({
-  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai', // Pybara backend canister
-  host: 'https://ic0.app', // Mainnet
-  
-  // Optional: Customize wallet icons (defaults to emoji)
-  walletIcons: {
-    oisy: '/assets/logos/oisy.svg',
-    plug: '/assets/logos/plug.svg'
-    // nfid: will use default emoji '🔐'
-  }
-});
-
-// Initialize a payment
-const result = await agent.initPayment({
-  orderId: 12345,
-  siteUrl: 'https://mystore.com',
-  siteName: 'My Store',
-  platform: 'Shopify', // or 'WooCommerce', 'Magento', etc.
-  usdAmount: 49.99,
-  token: 'ckBTC',
-  merchantPrincipal: 'xxxxx-xxxxx-xxxxx-xxxxx-cai',
-  userPrincipal: 'yyyyy-yyyyy-yyyyy-yyyyy-cai', // optional
-  wallet: 'Oisy', // optional
-});
-
-console.log('Payment ID:', result.paymentId);
-console.log('Expected Amount:', result.expectedAmount);
-console.log('Price Used:', result.priceUsed);
-```
-
-### **2. Connect Wallet**
-
-```javascript
-import { WalletManager } from '@yogabuild/pybara-sdk/wallets';
-
-const walletManager = new WalletManager();
-
-// Connect to Oisy
-await walletManager.connect('oisy');
-
-// Get user's principal
-const principal = walletManager.getPrincipal();
-
-// Check token balance
-const balance = await walletManager.getBalance('ckBTC');
-```
-
-### **3. Execute Payment**
-
-```javascript
-import { PaymentExecutor } from '@yogabuild/pybara-sdk';
-
-const executor = new PaymentExecutor(agent, walletManager);
-
-// Execute full payment flow
-const result = await executor.executePayment({
-  orderId: 12345,
-  siteUrl: 'https://mystore.com',
-  siteName: 'My Store',
-  platform: 'Shopify',
-  usdAmount: 49.99,
-  token: 'ckBTC',
-  merchantPrincipal: 'xxxxx-xxxxx-xxxxx-xxxxx-cai',
-});
-
-console.log('Merchant TX:', result.merchantTxId);
-console.log('Platform TX:', result.platformTxId);
-```
-
----
-
-## 📚 API Reference
-
-### **Core Module**
+## Quick Start
 
 ```javascript
 import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
 // Initialize agent
-const agent = new PybaraAgent(config);
+const agent = new PybaraAgent({
+  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai',
+  host: 'https://icp-api.io',
+  debug: false
+});
 
-// Payment lifecycle
-await agent.initPayment(params);
-await agent.recordPayment(params);
-await agent.confirmPayment(params);
-await agent.getPaymentByOrder(params);
-
-// Utilities
-await agent.getTokenPrices();
-await agent.getMinimumOrderAmounts();
-
-// 🆕 Helper methods (for UI/checkout)
-await agent.getAvailableTokens();        // Get list of supported tokens
-await agent.getBalance(token);           // Get user's balance for token
-await agent.getTokenPrice(token);        // Get current price for token
-await agent.getMinimumAmount(token);     // Get minimum order amount
-```
-
-### **Helper Methods** (New!)
-
-These methods make it easy to build checkout UIs and token pickers.
-
-```javascript
-import { PybaraAgent } from '@yogabuild/pybara-sdk';
-
-const agent = new PybaraAgent(config);
-
-// 1. Get list of available tokens
-const tokens = await agent.getAvailableTokens();
-// Returns: ['ICP', 'ckBTC', 'ckETH', 'ckUSDC', 'ckUSDT']
-
-// 2. Get user's balance for a token (requires connected wallet)
+// Connect wallet
 await agent.connectWallet('oisy');
-const balance = await agent.getBalance('ckBTC');
-// Returns: { raw: 50000000n, formatted: '0.50000000 ckBTC' }
 
-// 3. Get current token price
-const price = await agent.getTokenPrice('ckBTC');
-// Returns: 98234.56 (USD)
+// Calculate payment amount
+const calc = await agent.calculateAmount(49.99, 'ckBTC');
+console.log('Expected amount:', calc.expected_amount);
+console.log('Price used:', calc.price_used);
 
-// 4. Get minimum order amount
-const minimum = await agent.getMinimumAmount('ckBTC');
-// Returns: { usd: 5.00, token: '0.00005090 ckBTC' }
+// Send customer payment to Pybara Core
+const blockIndex = await agent.sendCustomerPaymentToPybaraCore(
+  calc.expected_amount,
+  'zvgwv-zyaaa-aaaac-qchaq-cai',
+  'ckBTC'
+);
+
+// Create payment record
+const payment = await agent.createPaymentRecord({
+  orderId: 12345,
+  siteUrl: 'https://mystore.com',
+  siteName: 'My Store',
+  platform: 'woocommerce',
+  usdAmount: 49.99,
+  token: 'ckBTC',
+  merchantPrincipal: 'merchant-principal-id',
+  userPrincipal: agent.walletManager.getPrincipal(),
+  wallet: 'Oisy'
+});
+
+// Verify customer payment on-chain
+await agent.verifyAndRecordCustomerPayment(
+  payment.payment_id,
+  12345,
+  'https://mystore.com',
+  'merchant-principal-id',
+  blockIndex,
+  calc.expected_amount
+);
+
+// Execute payout to merchant (99% merchant, 1% platform fee)
+await agent.executePayoutToMerchant(
+  payment.payment_id,
+  12345,
+  'https://mystore.com',
+  'merchant-principal-id'
+);
 ```
 
-**Perfect for building:**
-- Token pickers (show available tokens with balances)
-- Order validation (check minimums)
-- Price displays (show real-time prices)
-- Balance checks (before initiating payment)
+---
 
-### **Currency & Conversion Helpers** (v1.2.0+)
+## API Reference
 
-These methods handle currency conversion and formatting for global e-commerce.
+### Core Agent
 
 ```javascript
 import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
 const agent = new PybaraAgent(config);
 
-// 1. Convert minimum from smallest units to USD
-const minUSD = await agent.convertMinimumToUSD(1000000, 'ckUSDC', 1.00);
-// Returns: 1.00 (USD)
+// Wallet
+await agent.connectWallet('oisy');  // or 'plug', 'nfid'
+await agent.disconnectWallet();
+agent.isWalletConnected();
+agent.walletManager.getPrincipal();
 
-// 2. Convert USD to target currency
-const eurAmount = agent.convertUSDToCurrency(10.00, 'EUR', 0.92);
-// Returns: 9.20
+// Payment Lifecycle
+await agent.calculateAmount(usdAmount, token);
+await agent.sendCustomerPaymentToPybaraCore(amountE8s, pybaraCorePrincipal, token);
+await agent.createPaymentRecord(params);
+await agent.verifyAndRecordCustomerPayment(paymentId, orderId, siteUrl, merchantPrincipal, txId, receivedAmount);
+await agent.executePayoutToMerchant(paymentId, orderId, siteUrl, merchantPrincipal);
 
-// 3. Format currency for display
-const formatted = agent.formatCurrency(10.50, 'EUR', 'de-DE');
-// Returns: "10,50 €"
+// Query
+await agent.getPayment(paymentId);
+await agent.getPaymentByOrder(orderId, siteUrl, merchantPrincipal);
+await agent.getTokenPrices();
+await agent.getTokenConfig();
 
-// With Chinese Yuan
-const formatted = agent.formatCurrency(100, 'CNY', 'zh-CN');
-// Returns: "¥100.00"
+// Balance Checking
+await agent.getAvailableTokens();
+await agent.getBalance(token);
+await agent.checkTokenBalance(token, requiredAmount);
+await agent.checkAllBalances(['ICP', 'ckBTC']);
 
-// 4. Check if order meets minimum
-const check = await agent.checkOrderMeetsMinimum(
-  50.00,      // order total
-  1000000,    // minimum in smallest units
-  'ckUSDC',   // token
-  1.00,       // token price (USD)
-  'EUR',      // order currency
-  0.92        // exchange rate (USD to EUR)
-);
-// Returns: { meetsMinimum: true, minUSD: 1.00, minConverted: 0.92, shortfall: 0 }
-
-// 5. Format token balance
-const formatted = agent.formatTokenBalance(50000000n, 'ckBTC', 8);
-// Returns: "0.50000000"
-
-// 6. Get token decimals
-const decimals = agent.getTokenDecimals('ckBTC');
-// Returns: 8
+// Pricing
+await agent.getTokenPrice(token);
+await agent.getMinimumAmount(token);
 ```
 
-**Direct imports available:**
-```javascript
-import { 
-  convertMinimumToUSD, 
-  convertUSDToCurrency,
-  formatCurrency,
-  checkOrderMeetsMinimum 
-} from '@yogabuild/pybara-sdk';
-
-// Use functions directly without agent instance
-const minUSD = convertMinimumToUSD(1000000, 'ckUSDC', 1.00);
-const formatted = formatCurrency(10.50, 'EUR', 'de-DE');
-```
-
-**Perfect for:**
-- Multi-currency e-commerce (WooCommerce, Shopify, etc.)
-- Standalone checkout components
-- Minimum order validation across currencies
-- Global localization (supports 160+ currencies via `Intl.NumberFormat`)
-
-### **Wallet Module**
+### Wallet Adapters
 
 ```javascript
 import { 
   WalletManager,
   OisyWalletAdapter,
   PlugWalletAdapter,
-} from '@yogabuild/pybara-sdk/wallets';
+  NFIDWalletAdapter 
+} from '@yogabuild/pybara-sdk';
 
-// Create wallet manager
 const manager = new WalletManager();
+manager.registerWallet(new OisyWalletAdapter());
+manager.registerWallet(new PlugWalletAdapter());
+manager.registerWallet(new NFIDWalletAdapter());
 
-// Connect wallet
-await manager.connect('oisy'); // or 'plug', 'stoic', 'nfid', 'bitfinity'
-
-// Get connected wallet info
+await manager.connect('oisy');
 const principal = manager.getPrincipal();
-const accountId = manager.getAccountId();
-
-// Check balances
-const balance = await manager.getBalance('ICP');
-const allBalances = await manager.getAllBalances(['ICP', 'ckBTC', 'ckETH']);
-
-// Execute transfer
-const txId = await manager.transfer({
-  to: 'recipient-principal',
-  amount: 100000000n, // 1 ICP (8 decimals)
-  token: 'ICP',
-});
+await manager.disconnect();
 ```
 
-### **Payment Module**
+### Currency Utilities
+
+```javascript
+import {
+  convertMinimumToUSD,
+  convertUSDToCurrency,
+  checkOrderMeetsMinimum,
+  formatTokenBalance,
+  getTokenDecimals,
+  CurrencyFormatter
+} from '@yogabuild/pybara-sdk';
+
+// Convert minimum from smallest units to USD
+const minUSD = convertMinimumToUSD(1000000, 'ckUSDC', 1.00);
+
+// Convert USD to target currency
+const eurAmount = convertUSDToCurrency(10.00, 'EUR', 0.92);
+
+// Format currency
+const formatter = new CurrencyFormatter('en-US', 'USD');
+const formatted = formatter.format(49.99, 'EUR'); // "€49.99"
+
+// Check order minimum
+const check = checkOrderMeetsMinimum(
+  50.00,      // order total
+  1000000,    // minimum in smallest units
+  'ckUSDC',   // token
+  1.00,       // token price
+  'EUR',      // order currency
+  0.92        // exchange rate
+);
+
+// Format token balance
+const formatted = formatTokenBalance(50000000n, 'ckBTC', 8);
+// Returns: "0.5"
+
+// Get token decimals
+const decimals = getTokenDecimals('ckBTC'); // 8
+```
+
+### Balance Checking
 
 ```javascript
 import { 
-  BalanceChecker,
-  PriceCache,
-  MinimumChecker,
-} from '@yogabuild/pybara-sdk/payment';
+  checkBalance,
+  checkSufficientBalance,
+  formatBalance,
+  checkMultipleBalances 
+} from '@yogabuild/pybara-sdk';
 
-// Check if user has sufficient balance
-const checker = new BalanceChecker(walletManager);
-const hasBalance = await checker.checkSufficient('ckBTC', 50000000n);
+// Check single balance
+const balance = await checkBalance(principal, 'ckBTC', ledgerCanisterId);
 
-// Fetch and cache token prices
+// Check if sufficient
+const result = await checkSufficientBalance(
+  principal,
+  'ckBTC',
+  BigInt(50000000),
+  ledgerCanisterId
+);
+
+// Format balance
+const formatted = formatBalance(BigInt(50000000), 'ckBTC');
+// Returns: "0.50000000 ckBTC"
+
+// Check multiple tokens
+const balances = await checkMultipleBalances(principal, ['ICP', 'ckBTC']);
+```
+
+### Price Caching
+
+```javascript
+import { PriceCache } from '@yogabuild/pybara-sdk';
+
 const cache = new PriceCache(agent);
-const prices = await cache.getPrices(['ICP', 'ckBTC', 'ckETH']);
 
-// Check minimum order amounts
-const minimumChecker = new MinimumChecker(agent);
-const meetsMinimum = await minimumChecker.check('ICP', 49.99);
+// Start background updates
+cache.start();
+
+// Get cached prices
+const prices = await cache.getPrices();
+
+// Stop updates
+cache.stop();
 ```
 
-### **UI Module** (Vanilla JS Components)
+### Configuration
 
 ```javascript
-import { 
-  WalletSelector,
-  PaymentProgress,
-  TokenPicker,
-} from '@yogabuild/pybara-sdk/ui';
+import {
+  BACKEND_CANISTER_ID,
+  IC_HOSTS,
+  LEDGER_CANISTERS,
+  SUPPORTED_TOKENS,
+  SUPPORTED_WALLETS,
+  TOKEN_DECIMALS,
+  createConfig
+} from '@yogabuild/pybara-sdk';
 
-// Render wallet selector
-const selector = new WalletSelector({
-  container: document.getElementById('wallet-container'),
-  wallets: ['oisy', 'plug', 'nfid'],
-  onConnect: (wallet) => console.log('Connected:', wallet),
-});
+// Use defaults
+const config = createConfig();
 
-// Show payment progress
-const progress = new PaymentProgress({
-  container: document.getElementById('progress-container'),
-});
-
-progress.update(1, 'Initializing payment...');
-progress.update(2, 'Connecting wallet...');
-progress.update(3, 'Sending payment...');
-progress.complete('Payment successful!');
-```
-
----
-
-## 🌍 Platform Integration Examples
-
-### **WooCommerce (PHP + JavaScript)**
-
-```javascript
-// woocommerce-pybara/assets/js/checkout.js
-import { PybaraAgent, WalletManager } from '@yogabuild/pybara-sdk';
-
-const agent = new PybaraAgent({ /* config */ });
-const wallets = new WalletManager();
-
-// Hook into WooCommerce checkout
-jQuery(document.body).on('checkout_place_order_wc_pybara', async function() {
-  await wallets.connect('oisy');
-  const result = await agent.initPayment({
-    platform: 'WooCommerce',
-    // ... other params from PHP
-  });
-  // ... continue payment flow
-});
-```
-
-### **Shopify (Node.js + React)**
-
-```typescript
-// pybara-shopify/extensions/checkout/Checkout.tsx
-import { PybaraAgent, WalletManager } from '@yogabuild/pybara-sdk';
-import { useEffect, useState } from 'react';
-
-export function PybaraCheckout() {
-  const [agent] = useState(() => new PybaraAgent({ /* config */ }));
-  const [wallets] = useState(() => new WalletManager());
-
-  const handlePayment = async () => {
-    await wallets.connect('plug');
-    const result = await agent.initPayment({
-      platform: 'Shopify',
-      // ... other params from Shopify
-    });
-    // ... continue payment flow
-  };
-
-  return <button onClick={handlePayment}>Pay with Crypto</button>;
-}
-```
-
-### **Magento (PHP + JavaScript)**
-
-```javascript
-// pybara-magento/view/frontend/web/js/view/payment/method-renderer/pybara.js
-import { PybaraAgent, WalletManager } from '@yogabuild/pybara-sdk';
-
-define(['uiComponent'], function(Component) {
-  return Component.extend({
-    async placeOrder() {
-      const agent = new PybaraAgent({ /* config */ });
-      const wallets = new WalletManager();
-      
-      await wallets.connect('oisy');
-      const result = await agent.initPayment({
-        platform: 'Magento',
-        // ... other params
-      });
-      // ... continue payment flow
-    }
-  });
+// Or customize
+const customConfig = createConfig({
+  canisterId: 'your-canister-id',
+  host: IC_HOSTS.mainnet,
+  debug: true
 });
 ```
 
 ---
 
-## 🔧 Configuration
-
-### **Default Configuration**
-
-```javascript
-const config = {
-  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai', // Pybara backend
-  host: 'https://ic0.app',                   // Mainnet
-  
-  // Optional overrides
-  tokens: ['ICP', 'ckBTC', 'ckETH', 'ckUSDC', 'ckUSDT'],
-  wallets: ['oisy', 'plug', 'stoic', 'nfid', 'bitfinity'],
-  
-  // Price cache (15 minutes)
-  priceCacheDuration: 15 * 60 * 1000,
-  
-  // ICRC-1 indexing delay (8 seconds)
-  icrc1IndexingDelay: 8000,
-  
-  // Debug mode
-  debug: false,
-};
-```
-
-### **Custom Configuration**
-
-```javascript
-import { PybaraAgent, config } from '@yogabuild/pybara-sdk';
-
-// Override defaults
-config.debug = true;
-config.priceCacheDuration = 10 * 60 * 1000; // 10 minutes
-
-const agent = new PybaraAgent({
-  canisterId: config.canisterId,
-  host: config.host,
-});
-```
-
----
-
-## 🧪 Testing
-
-```bash
-# Unit tests
-npm test
-
-# Integration tests (requires IC replica)
-npm run test:integration
-
-# E2E tests (requires wallet extensions)
-npm run test:e2e
-```
-
----
-
-## 📁 Package Structure
+## Package Structure
 
 ```
 @yogabuild/pybara-sdk/
@@ -480,14 +280,35 @@ npm run test:e2e
 ├── dist/                         # Compiled bundles
 │   └── pybara-sdk.js             # Full bundle
 │
-├── package.json
-├── vite.config.js
-└── README.md
+└── package.json
 ```
 
 ---
 
-## 🔐 Security
+## Configuration Options
+
+```javascript
+const config = {
+  // Required
+  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai',  // Pybara backend
+  host: 'https://icp-api.io',                 // IC network
+  
+  // Optional
+  isMainnet: true,
+  tokens: ['ICP', 'ckBTC', 'ckETH', 'ckUSDC', 'ckUSDT'],
+  wallets: ['oisy', 'plug', 'nfid'],
+  icrc1IndexingDelay: 8000,           // 8 seconds
+  walletApprovalTimeout: 300000,      // 5 minutes
+  backendConfirmationTimeout: 60000,  // 1 minute
+  maxRetryAttempts: 3,
+  retryDelay: 2000,                   // 2 seconds
+  debug: false
+};
+```
+
+---
+
+## Security
 
 - ✅ No private keys stored
 - ✅ All transfers initiated by user wallets
@@ -497,38 +318,18 @@ npm run test:e2e
 
 ---
 
-## 🦫 Contributing
-
-This is a core Pybara package. Changes here affect **all** platform integrations.
-
-**Before making changes:**
-1. Test with WooCommerce
-2. Test with Shopify
-3. Update version number
-4. Document breaking changes
-
----
-
-## 🌐 Community
-
-- X: [@pybara_hq](https://twitter.com/pybara_hq)
-- Email: contact@pybara.com
-
----
-
-## 📄 License
+## License
 
 MIT - See [LICENSE](./LICENSE)
 
 ---
 
-## 🌟 Status
+## Status
 
-**Version**: 2.1.0  
-**Stability**: Production-ready  
-**License**: MIT
+**Version:** 2.1.0  
+**Stability:** Production-ready  
+**License:** MIT
 
 ---
 
 **Built by [Yogabuild](https://github.com/yogabuild) | ICP Dev House**
-
