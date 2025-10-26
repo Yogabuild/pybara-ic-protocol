@@ -6,7 +6,7 @@
  */
 
 import { Principal } from '@dfinity/principal';
-import { WalletAdapter } from '../base/WalletAdapter.js';
+import { WalletAdapter } from './BaseWalletAdapter.js';
 
 // Ledger canister IDs for whitelist
 const LEDGER_CANISTERS = {

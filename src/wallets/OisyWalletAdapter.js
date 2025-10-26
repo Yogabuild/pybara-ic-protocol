@@ -7,7 +7,7 @@
 
 import { IcrcWallet } from '@dfinity/oisy-wallet-signer/icrc-wallet';
 import { Principal } from '@dfinity/principal';
-import { WalletAdapter } from '../base/WalletAdapter.js';
+import { WalletAdapter } from './BaseWalletAdapter.js';
 
 export class OisyWalletAdapter extends WalletAdapter {
     constructor(isMainnet = true) {

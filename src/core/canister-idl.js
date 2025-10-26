@@ -1,8 +1,16 @@
 /**
  * Candid IDL Interface for Pybara Payment Gateway Canister
  * 
- * Defines the service interface for interacting with the backend canister
- * including payment lifecycle, price oracle, and token configuration methods.
+ * IDL (Interface Definition Language) is the Internet Computer's way of defining
+ * canister APIs. This file contains the Candid interface that describes:
+ * - What methods the backend canister exposes
+ * - What parameters each method accepts (types, structure)
+ * - What each method returns (success/error variants)
+ * 
+ * This allows JavaScript to communicate with the Motoko backend canister by
+ * providing the "contract" for serialization/deserialization of data.
+ * 
+ * Includes: payment lifecycle, price oracle, and token configuration methods.
  */
 
 export const idlFactory = ({ IDL }) => {

@@ -1,41 +1,25 @@
 /**
- * =============================================================================
  * Pybara IC Protocol - Core Configuration
- * =============================================================================
- * 
  * Platform-agnostic configuration for IC protocol integration.
- * Platforms can override these defaults as needed.
- * 
  * Last updated: October 18, 2025
  */
 
-// =============================================================================
-// 🏗️ INTERNET COMPUTER
-// =============================================================================
+// 🏗️ INTERNET COMPUTER ========================================================
 
-/**
- * Pybara backend canister ID (mainnet)
- */
+// Pybara backend canister ID (mainnet)
 export const BACKEND_CANISTER_ID = 'zvgwv-zyaaa-aaaac-qchaq-cai';
 
-/**
- * IC network hosts
- */
+// IC network hosts
 export const IC_HOSTS = {
   mainnet: 'https://icp-api.io',
   local: 'http://localhost:4943'
 };
 
-// =============================================================================
-// 🔗 LEDGER CANISTER IDS
-// =============================================================================
+// 🔗 LEDGER CANISTER IDS =======================================================
 
-/**
- * Mainnet ledger canister IDs for each supported token.
- * Used to generate transaction verification URLs.
- * 
- * ⚠️ DO NOT CHANGE unless ledger canisters are migrated.
- */
+// Mainnet ledger canister IDs for each supported token
+// Used to generate transaction verification URLs
+// ⚠️ DO NOT CHANGE unless ledger canisters are migrated
 export const LEDGER_CANISTERS = {
   'ICP': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
   'ckBTC': 'mxzaz-hqaaa-aaaar-qaada-cai',
@@ -44,67 +28,38 @@ export const LEDGER_CANISTERS = {
   'ckUSDT': 'cngnf-vqaaa-aaaar-qag4q-cai'
 };
 
-// =============================================================================
-// ⏱️ TRANSACTION INDEXING
-// =============================================================================
+// ⏱️ TRANSACTION INDEXING ======================================================
 
-/**
- * Expected blockchain indexing delay for ICRC-1 transactions (in milliseconds).
- * 
- * Why 8 seconds?
- * - ICRC-1 transactions typically take 5-10 seconds to be indexed
- * - 8 seconds is a conservative middle ground
- * - Better to show link slightly late than show "not found" error
- */
+// Expected blockchain indexing delay for ICRC-1 transactions (in milliseconds)
+// Why 8 seconds? ICRC-1 transactions typically take 5-10 seconds to be indexed.
+// 8 seconds is a conservative middle ground. Better to show link slightly late than show "not found" error.
 export const ICRC1_INDEXING_DELAY = 8000;  // 8 seconds
 
-// =============================================================================
-// 🔐 SECURITY & PERFORMANCE
-// =============================================================================
+// 🔐 SECURITY & PERFORMANCE ====================================================
 
-/**
- * Maximum time to wait for wallet approval (in milliseconds)
- * Prevents infinite waiting if user closes wallet popup
- */
+// Maximum time to wait for wallet approval (in ms). Prevents infinite waiting if user closes wallet popup.
 export const WALLET_APPROVAL_TIMEOUT = 300000;  // 5 minutes
 
-/**
- * Maximum time to wait for backend confirmation (in milliseconds)
- * Prevents hanging if backend is slow/unresponsive
- */
+// Maximum time to wait for backend confirmation (in ms). Prevents hanging if backend is slow/unresponsive.
 export const BACKEND_CONFIRMATION_TIMEOUT = 60000;  // 1 minute
 
-/**
- * Retry attempts for failed network requests
- */
+// Retry attempts for failed network requests
 export const MAX_RETRY_ATTEMPTS = 3;
 
-/**
- * Delay between retry attempts (in milliseconds)
- */
+// Delay between retry attempts (in milliseconds)
 export const RETRY_DELAY = 2000;  // 2 seconds
 
-// =============================================================================
-// 📊 SUPPORTED TOKENS & WALLETS
-// =============================================================================
+// 📊 SUPPORTED TOKENS & WALLETS ================================================
 
-/**
- * Supported tokens
- */
+// Supported tokens
 export const SUPPORTED_TOKENS = ['ICP', 'ckBTC', 'ckETH', 'ckUSDC', 'ckUSDT'];
 
-/**
- * Supported wallets
- */
+// Supported wallets
 export const SUPPORTED_WALLETS = ['oisy', 'plug', 'stoic', 'nfid', 'bitfinity'];
 
-// =============================================================================
-// 💵 TOKEN DECIMALS
-// =============================================================================
+// 💵 TOKEN DECIMALS ============================================================
 
-/**
- * Token decimals (for formatting)
- */
+// Token decimals (for formatting)
 export const TOKEN_DECIMALS = {
   'ICP': 8,
   'ckBTC': 8,
@@ -113,14 +68,9 @@ export const TOKEN_DECIMALS = {
   'ckUSDT': 6
 };
 
-// =============================================================================
-// 🎯 DEFAULT CONFIGURATION
-// =============================================================================
+// 🎯 DEFAULT CONFIGURATION =====================================================
 
-/**
- * Default configuration object
- * Platforms can extend/override these values
- */
+// Default configuration object. Platforms can extend/override these values.
 export const DEFAULT_CONFIG = {
   canisterId: BACKEND_CANISTER_ID,
   host: IC_HOSTS.mainnet,
@@ -135,15 +85,9 @@ export const DEFAULT_CONFIG = {
   debug: false
 };
 
-// =============================================================================
-// 🧩 CONFIGURATION BUILDER
-// =============================================================================
+// 🧩 CONFIGURATION BUILDER =====================================================
 
-/**
- * Merge user config with defaults
- * @param {Object} userConfig - User-provided configuration
- * @returns {Object} - Merged configuration
- */
+// Merge user config with defaults
 export function createConfig(userConfig = {}) {
   return {
     ...DEFAULT_CONFIG,

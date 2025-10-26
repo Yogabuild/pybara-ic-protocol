@@ -26,10 +26,10 @@ export {
 
 // Wallet exports
 export { WalletManager } from './wallets/WalletManager.js';
-export { WalletAdapter } from './wallets/base/WalletAdapter.js';
-export { OisyWalletAdapter } from './wallets/oisy/OisyWalletAdapter.js';
-export { PlugWalletAdapter } from './wallets/plug/PlugWalletAdapter.js';
-export { NFIDWalletAdapter } from './wallets/nfid/NFIDWalletAdapter.js';
+export { WalletAdapter } from './wallets/BaseWalletAdapter.js';
+export { OisyWalletAdapter } from './wallets/OisyWalletAdapter.js';
+export { PlugWalletAdapter } from './wallets/PlugWalletAdapter.js';
+export { NFIDWalletAdapter } from './wallets/NFIDWalletAdapter.js';
 
 // Payment utilities
 export {

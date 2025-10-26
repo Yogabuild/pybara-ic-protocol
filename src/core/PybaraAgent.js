@@ -10,9 +10,9 @@
 import { HttpAgent, Actor } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { WalletManager } from '../wallets/WalletManager.js';
-import { OisyWalletAdapter } from '../wallets/oisy/OisyWalletAdapter.js';
-import { PlugWalletAdapter } from '../wallets/plug/PlugWalletAdapter.js';
-import { NFIDWalletAdapter } from '../wallets/nfid/NFIDWalletAdapter.js';
+import { OisyWalletAdapter } from '../wallets/OisyWalletAdapter.js';
+import { PlugWalletAdapter } from '../wallets/PlugWalletAdapter.js';
+import { NFIDWalletAdapter } from '../wallets/NFIDWalletAdapter.js';
 import { getLedgerCanisterId, LEDGER_IDS } from '../utils/ledger-config.js';
 import { checkBalance, checkSufficientBalance, checkMultipleBalances, formatBalance } from '../payment/balance-checker.js';
 import { idlFactory } from './canister-idl.js';
