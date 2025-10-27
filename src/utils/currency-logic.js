@@ -6,16 +6,7 @@
  * Platform-agnostic, works with any e-commerce system or standalone.
  */
 
-/**
- * Token decimal places
- */
-const TOKEN_DECIMALS = {
-    'ICP': 8,
-    'ckBTC': 8,
-    'ckETH': 18,
-    'ckUSDC': 6,
-    'ckUSDT': 6
-};
+import { TOKEN_DECIMALS } from '../core/config.js';
 
 /**
  * Convert minimum amount from smallest units to USD

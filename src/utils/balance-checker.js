@@ -7,17 +7,7 @@
 
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-
-/**
- * Token decimal places for formatting
- */
-const TOKEN_DECIMALS = {
-  'ICP': 8,
-  'ckBTC': 8,
-  'ckETH': 18,
-  'ckUSDC': 6,
-  'ckUSDT': 6
-};
+import { TOKEN_DECIMALS } from '../core/config.js';
 
 /**
  * ICRC-1 Ledger IDL Factory (minimal - just balance query)

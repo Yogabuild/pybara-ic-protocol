@@ -7,6 +7,8 @@
  * @module utils/payment-calculator
  */
 
+import { PAYMENT_BUFFER_PERCENT } from '../core/config.js';
+
 /**
  * Calculate payment details for an order
  * 
@@ -39,11 +41,14 @@ export class PaymentCalculator {
         const requiredAmount = usdAmount / price;
         const requiredSmallestUnit = BigInt(Math.ceil(requiredAmount * Math.pow(10, decimals)));
         
-        // Add 10% buffer to account for:
-        // - Platform fee (1%)
-        // - Transfer fees (user + merchant + platform)
-        // - Price fluctuations during payment
-        const requiredWithBuffer = requiredSmallestUnit + (requiredSmallestUnit / 10n);
+        // Add buffer to account for price fluctuations during payment
+        // Configurable via PAYMENT_BUFFER_PERCENT (default 10%)
+        // Buffer protects against:
+        // - User sees price, connects wallet (10-30 seconds)
+        // - Price moves during wallet approval
+        // - Payment would fail with "insufficient balance"
+        const bufferMultiplier = BigInt(PAYMENT_BUFFER_PERCENT);
+        const requiredWithBuffer = requiredSmallestUnit + (requiredSmallestUnit * bufferMultiplier / 100n);
         
         // Check constraints
         const isBelowMinimum = requiredSmallestUnit < minimum;

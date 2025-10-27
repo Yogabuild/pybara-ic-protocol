@@ -4,16 +4,13 @@
  * Maps tokens to their official IC ledger canister IDs
  */
 
+import { LEDGER_CANISTERS } from '../core/config.js';
+
 /**
  * Official IC Ledger Canister IDs
+ * Re-export from config for backward compatibility
  */
-export const LEDGER_IDS = {
-  'ICP': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
-  'ckBTC': 'mxzaz-hqaaa-aaaar-qaada-cai',
-  'ckETH': 'ss2fx-dyaaa-aaaar-qacoq-cai',
-  'ckUSDC': 'xevnm-gaaaa-aaaar-qafnq-cai',
-  'ckUSDT': 'cngnf-vqaaa-aaaar-qag4q-cai'
-};
+export const LEDGER_IDS = LEDGER_CANISTERS;
 
 /**
  * Get ledger canister ID for a token

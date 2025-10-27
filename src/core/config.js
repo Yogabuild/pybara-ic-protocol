@@ -49,6 +49,25 @@ export const MAX_RETRY_ATTEMPTS = 3;
 // Delay between retry attempts (in milliseconds)
 export const RETRY_DELAY = 2000;  // 2 seconds
 
+// 💰 PAYMENT CALCULATION =======================================================
+
+// Payment buffer percentage (for price fluctuation protection)
+// Applied to balance checks and payment calculations to handle price volatility
+// Example: 10 = 10% buffer
+// 
+// Why needed?
+// - User sees "Send 0.5 ckBTC" at current price
+// - User connects wallet and approves (takes 10-30 seconds)
+// - Price moves 2%: now needs 0.51 ckBTC
+// - Without buffer: Payment fails with "insufficient balance"
+// - With 10% buffer: User pre-checked to have 0.55 ckBTC available
+// 
+// Recommendation:
+// - Volatile assets (ckBTC, ckETH): 10% (default)
+// - Stablecoins only (ckUSDC, ckUSDT): 2-5%
+// - High-frequency trading: 15-20%
+export const PAYMENT_BUFFER_PERCENT = 10;
+
 // 📊 SUPPORTED TOKENS & WALLETS ================================================
 
 // Supported tokens
@@ -82,6 +101,7 @@ export const DEFAULT_CONFIG = {
   backendConfirmationTimeout: BACKEND_CONFIRMATION_TIMEOUT,
   maxRetryAttempts: MAX_RETRY_ATTEMPTS,
   retryDelay: RETRY_DELAY,
+  paymentBufferPercent: PAYMENT_BUFFER_PERCENT,
   debug: false
 };
 
