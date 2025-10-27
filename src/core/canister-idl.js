@@ -86,24 +86,6 @@ export const idlFactory = ({ IDL }) => {
     'verify_and_record_customer_payment' : IDL.Func([IDL.Opt(IDL.Nat), IDL.Nat, IDL.Text, IDL.Principal, IDL.Nat, IDL.Nat], [Result_1], []),
     'execute_payout_to_merchant' : IDL.Func([IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat), IDL.Opt(IDL.Text), IDL.Opt(IDL.Principal)], [ConfirmPaymentResult], []),
     
-    // Backwards compatibility aliases (deprecated)
-    'init_payment' : IDL.Func(
-        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Float64, IDL.Text, IDL.Principal, IDL.Opt(IDL.Principal), IDL.Opt(IDL.Text)],
-        [
-          IDL.Record({
-            'status' : IDL.Text,
-            'error' : IDL.Opt(IDL.Text),
-            'payment_url' : IDL.Opt(IDL.Text),
-            'expected_amount' : IDL.Opt(IDL.Nat),
-            'price_used' : IDL.Opt(IDL.Float64),
-            'payment_id' : IDL.Opt(IDL.Nat),
-          }),
-        ],
-        [],
-      ),
-    'record_payment' : IDL.Func([IDL.Opt(IDL.Nat), IDL.Nat, IDL.Text, IDL.Principal, IDL.Nat, IDL.Nat], [Result_1], []),
-    'confirm_payment' : IDL.Func([IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat), IDL.Opt(IDL.Text), IDL.Opt(IDL.Principal)], [ConfirmPaymentResult], []),
-    
     // Query methods
     'get_payment' : IDL.Func([IDL.Nat], [IDL.Opt(Payment)], ['query']),
     'get_payment_by_order' : IDL.Func([IDL.Nat, IDL.Text, IDL.Principal], [IDL.Opt(Payment)], ['query']),
