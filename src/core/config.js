@@ -31,9 +31,9 @@ export const LEDGER_CANISTERS = {
 // ⏱️ TRANSACTION INDEXING ======================================================
 
 // Expected blockchain indexing delay for ICRC-1 transactions (in milliseconds)
-// Why 8 seconds? ICRC-1 transactions typically take 5-10 seconds to be indexed.
-// 8 seconds is a conservative middle ground. Better to show link slightly late than show "not found" error.
-export const ICRC1_INDEXING_DELAY = 8000;  // 8 seconds
+// NOTE: On-chain verification is currently a placeholder (not implemented for ICRC-1)
+// Reduced to 1 second to improve UX while verification is being built
+export const ICRC1_INDEXING_DELAY = 1000;  // 1 second
 
 // 🔐 SECURITY & PERFORMANCE ====================================================
 
