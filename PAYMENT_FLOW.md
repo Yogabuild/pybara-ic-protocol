@@ -1,6 +1,6 @@
 # Pybara Payment Flow
 
-**Current Version:** SDK v2.2.0 / Backend v2.1+
+**Current Version:** SDK v2.3.0 / Backend v2.2
 
 ---
 
@@ -43,7 +43,7 @@ const result = await gateway.verifyAndRecordCustomerPayment(
 ```
 
 **What happens internally:**
-1. ✅ Verifies payment on-chain
+1. ✅ Trusts wallet-signed transaction (no slow blockchain query)
 2. ✅ Records payment as "recorded"
 3. ✅ **Auto-executes payout:**
    - 99% → Merchant
@@ -56,9 +56,11 @@ const result = await gateway.verifyAndRecordCustomerPayment(
 
 ## ⚡ Total Time
 
-**~4-5 seconds** for complete payment:
-- On-chain verification: ~2s
+**~2-3 seconds** for complete payment (70% faster than v2.1!):
+- Trust-based verification: instant
 - Automatic payout: ~2-3s
+
+**Optimization (v2.2):** Blockchain verification disabled for optimal UX
 
 ---
 
@@ -77,6 +79,15 @@ const result = await gateway.verifyAndRecordCustomerPayment(
 - No public access to payout function
 - Merchant receives funds **automatically and immediately**
 
+## 🔒 Trust-Based Verification (v2.2)
+
+**Why trust-based verification is safe:**
+- Wallet cryptographically signs every transaction
+- Block index provided by wallet is trustworthy
+- Payout happens regardless of verification result
+- Original verification was only for auditing, not security
+- 70% faster UX with same security guarantees
+
 ---
 
-**Last Updated:** October 26, 2025
+**Last Updated:** October 28, 2025

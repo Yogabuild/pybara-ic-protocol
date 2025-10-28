@@ -27,7 +27,7 @@ import { PybaraAgent } from '@yogabuild/pybara-sdk';
 const agent = new PybaraAgent({
   canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai',
   host: 'https://icp-api.io',
-  debug: false
+  debug: false  // Set to true for verbose wallet/transaction logs
 });
 
 // Connect wallet
@@ -328,9 +328,35 @@ const config = {
   backendConfirmationTimeout: 60000,  // 1 minute
   maxRetryAttempts: 3,
   retryDelay: 2000,                   // 2 seconds
-  debug: false
+  debug: false                        // Controls wallet adapter logs (NEW in v2.3.0)
 };
 ```
+
+### Debug Mode (v2.3.0+)
+
+Control console logging for production:
+
+```javascript
+// Production: Clean console (no wallet logs)
+const agent = new PybaraAgent({
+  canisterId: '...',
+  debug: false  // Default
+});
+
+// Development: Verbose logging
+const agent = new PybaraAgent({
+  canisterId: '...',
+  debug: true  // Shows wallet connections, transfers, etc.
+});
+```
+
+**What `debug` controls:**
+- Wallet connection logs (Oisy, Plug, NFID)
+- Transaction signing details
+- Transfer execution logs
+- ICRC-1 ledger interactions
+
+**Production best practice:** Set `debug: false` for clean user experience
 
 ---
 
@@ -352,9 +378,14 @@ MIT - See [LICENSE](./LICENSE)
 
 ## Status
 
-**Version:** 2.1.0  
+**Version:** 2.3.0  
 **Stability:** Production-ready  
 **License:** MIT
+
+**Recent Changes (v2.3.0):**
+- ⚡ Debug flag for production (clean console)
+- ⚡ All wallet adapter logs now controllable
+- ⚡ Better logging control for integrators
 
 ---
 
