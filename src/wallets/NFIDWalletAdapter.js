@@ -19,8 +19,9 @@ import { getLedgerCanisterId } from '../utils/ledger-config.js';
 import { createLedgerActor } from '../utils/ledger-actor.js';
 
 export class NFIDWalletAdapter extends WalletAdapter {
-    constructor() {
+    constructor(debug = false) {
         super();
+        this.debug = debug;
         
         // Set wallet metadata
         this.type = 'nfid';
@@ -54,7 +55,6 @@ export class NFIDWalletAdapter extends WalletAdapter {
      * Opens NFID's authentication page for user login
      */
     async connect() {
-        console.log('🔐 Connecting to NFID...');
         
         try {
             // Create auth client if not exists
@@ -77,8 +77,10 @@ export class NFIDWalletAdapter extends WalletAdapter {
                     host: this.host
                 });
                 
-                console.log('✅ Already connected to NFID');
-                console.log('   Principal:', this.principal);
+                if (this.debug) {
+                    console.log('✅ Already connected to NFID');
+                    console.log('   Principal:', this.principal);
+                }
                 
                 return this.principal;
             }
@@ -101,24 +103,32 @@ export class NFIDWalletAdapter extends WalletAdapter {
                                 host: this.host
                             });
                             
-                            console.log('✅ Connected to NFID');
-                            console.log('   Principal:', this.principal);
+                            if (this.debug) {
+                                console.log('✅ Connected to NFID');
+                                console.log('   Principal:', this.principal);
+                            }
                             
                             resolve(this.principal);
                         } catch (error) {
-                            console.error('❌ Failed to initialize after NFID login:', error);
+                            if (this.debug) {
+                                console.error('❌ Failed to initialize after NFID login:', error);
+                            }
                             reject(this.createError(`Initialization failed: ${error.message}`));
                         }
                     },
                     onError: (error) => {
-                        console.error('❌ NFID login failed:', error);
+                        if (this.debug) {
+                            console.error('❌ NFID login failed:', error);
+                        }
                         reject(this.createError(`Login failed: ${error}`));
                     }
                 });
             });
             
         } catch (error) {
-            console.error('❌ Failed to connect to NFID:', error);
+            if (this.debug) {
+                console.error('❌ Failed to connect to NFID:', error);
+            }
             
             // Handle specific errors
             if (error.message?.includes('rejected')) {
@@ -140,7 +150,7 @@ export class NFIDWalletAdapter extends WalletAdapter {
             try {
                 await this.authClient.logout();
             } catch (error) {
-                console.warn('⚠️ NFID logout error (ignoring):', error);
+                // Silent - logout errors are non-critical
             }
         }
         
@@ -149,8 +159,6 @@ export class NFIDWalletAdapter extends WalletAdapter {
         this.identity = null;
         this.principal = null;
         this.connected = false;
-        
-        console.log('🔐 Disconnected from NFID');
     }
 
     /**
@@ -163,10 +171,6 @@ export class NFIDWalletAdapter extends WalletAdapter {
 
         const { to, amount, ledgerCanisterId } = params;
 
-        console.log('💸 Executing NFID transfer...');
-        console.log('   To:', to);
-        console.log('   Amount:', amount.toString());
-        console.log('   Ledger:', ledgerCanisterId);
 
         try {
             // Create ledger actor with NFID's agent
@@ -196,14 +200,13 @@ export class NFIDWalletAdapter extends WalletAdapter {
             }
 
             const blockIndex = result.Ok;
-            
-            console.log('✅ NFID transfer successful');
-            console.log('   Block index:', blockIndex.toString());
 
             return Number(blockIndex);
             
         } catch (error) {
-            console.error('❌ NFID transfer failed:', error);
+            if (this.debug) {
+                console.error('❌ NFID transfer failed:', error);
+            }
             
             // Handle specific errors
             if (error.message?.includes('InsufficientFunds')) {
@@ -222,7 +225,6 @@ export class NFIDWalletAdapter extends WalletAdapter {
      */
     async getBalance(ledgerCanisterId, tokenSymbol) {
         if (!this.connected || !this.principal || !this.agent) {
-            console.warn('⚠️ NFID not connected, cannot check balance');
             return 0n;
         }
 
@@ -238,12 +240,12 @@ export class NFIDWalletAdapter extends WalletAdapter {
 
             const balance = await ledger.icrc1_balance_of(account);
 
-            console.log(`💰 NFID balance (${tokenSymbol}):`, balance.toString());
-
             return balance;
             
         } catch (error) {
-            console.warn('⚠️ NFID balance query failed:', error);
+            if (this.debug) {
+                console.warn('⚠️ NFID balance query failed:', error);
+            }
             return 0n; // Return 0 on error (non-fatal)
         }
     }

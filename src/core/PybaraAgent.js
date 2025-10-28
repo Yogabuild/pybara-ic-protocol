@@ -34,12 +34,12 @@ export class PybaraAgent {
     this.walletIcons = fullConfig.walletIcons || {}; // Custom wallet icon URLs
     
     // Initialize wallet system
-    this.walletManager = new WalletManager();
+    this.walletManager = new WalletManager(this.debug);
     
     // Register wallet adapters
-    this.walletManager.registerWallet(new OisyWalletAdapter(this.isMainnet));
-    this.walletManager.registerWallet(new PlugWalletAdapter(this.isMainnet));
-    this.walletManager.registerWallet(new NFIDWalletAdapter());
+    this.walletManager.registerWallet(new OisyWalletAdapter(this.isMainnet, this.debug));
+    this.walletManager.registerWallet(new PlugWalletAdapter(this.isMainnet, this.debug));
+    this.walletManager.registerWallet(new NFIDWalletAdapter(this.debug));
     
     // Apply custom icons if provided
     if (Object.keys(this.walletIcons).length > 0) {
@@ -116,7 +116,9 @@ export class PybaraAgent {
       return principal;
       
     } catch (error) {
-      console.error('❌ Wallet connection failed:', error);
+      if (this.debug) {
+        console.error('❌ Wallet connection failed:', error);
+      }
       throw error;
     }
   }
@@ -204,23 +206,29 @@ export class PybaraAgent {
     }
 
     try {
-      console.log(`🧮 [PybaraAgent] Calculating amount: $${usdAmount} in ${token}`);
+      if (this.debug) {
+        console.log(`🧮 [PybaraAgent] Calculating amount: $${usdAmount} in ${token}`);
+      }
 
       const result = await this.actor.calculate_payment_amount(
         parseFloat(usdAmount),
         token
       );
 
-      console.log('🔍 [PybaraAgent] Calculate result:', result);
+      if (this.debug) {
+        console.log('🔍 [PybaraAgent] Calculate result:', result);
+      }
 
       // Handle Result<PaymentCalculation, Text>
       if (result.ok) {
         const calculation = result.ok;
-        console.log('🔍 [PybaraAgent] Calculation object:', calculation);
-        console.log('✅ Amount calculated');
-        console.log('   Token amount:', calculation.token_amount.toString());
-        console.log('   Price used:', calculation.price_used);
-        console.log('   USD amount:', calculation.usd_amount);
+        if (this.debug) {
+          console.log('🔍 [PybaraAgent] Calculation object:', calculation);
+          console.log('✅ Amount calculated');
+          console.log('   Token amount:', calculation.token_amount.toString());
+          console.log('   Price used:', calculation.price_used);
+          console.log('   USD amount:', calculation.usd_amount);
+        }
         
         return {
           expected_amount: calculation.token_amount.toString(),
@@ -229,12 +237,16 @@ export class PybaraAgent {
         };
       } else {
         const error = result.err || 'Failed to calculate payment amount';
-        console.error('❌ Calculation failed:', error);
+        if (this.debug) {
+          console.error('❌ Calculation failed:', error);
+        }
         throw new Error(error);
       }
     } catch (error) {
-      console.error('❌ Calculate amount failed:', error);
-      console.error('   Error details:', error);
+      if (this.debug) {
+        console.error('❌ Calculate amount failed:', error);
+        console.error('   Error details:', error);
+      }
       throw error;
     }
   }
@@ -331,12 +343,16 @@ export class PybaraAgent {
           merchant_principal: merchantPrincipalObj.toText()
         };
       } else {
-        console.error('❌ Canister returned error:', result.err || result.error);
-        console.error('   Full result:', result);
+        if (this.debug) {
+          console.error('❌ Canister returned error:', result.err || result.error);
+          console.error('   Full result:', result);
+        }
         throw new Error(result.err || (result.error && result.error[0]) || 'Failed to initialize payment');
       }
     } catch (error) {
-      console.error('❌ Init payment failed:', error);
+      if (this.debug) {
+        console.error('❌ Init payment failed:', error);
+      }
       throw error;
     }
   }
@@ -392,7 +408,9 @@ export class PybaraAgent {
         throw new Error(result.err || 'Failed to verify customer payment');
       }
     } catch (error) {
-      console.error('❌ Customer payment verification failed:', error);
+      if (this.debug) {
+        console.error('❌ Customer payment verification failed:', error);
+      }
       throw error;
     }
   }
@@ -434,7 +452,9 @@ export class PybaraAgent {
       const result = await this.actor.get_payment(BigInt(paymentId));
       return result.length > 0 ? result[0] : null;  // Candid Opt returns array
     } catch (error) {
-      console.error('❌ Get payment failed:', error);
+      if (this.debug) {
+        console.error('❌ Get payment failed:', error);
+      }
       throw error;
     }
   }
@@ -456,7 +476,9 @@ export class PybaraAgent {
       );
       return result.length > 0 ? result[0] : null;  // Candid Opt returns array
     } catch (error) {
-      console.error('❌ Get payment by order failed:', error);
+      if (this.debug) {
+        console.error('❌ Get payment by order failed:', error);
+      }
       throw error;
     }
   }
@@ -486,7 +508,9 @@ export class PybaraAgent {
       
       return priceList;
     } catch (error) {
-      console.error('❌ Get token prices failed:', error);
+      if (this.debug) {
+        console.error('❌ Get token prices failed:', error);
+      }
       throw error;
     }
   }
@@ -561,7 +585,9 @@ export class PybaraAgent {
         transfer_fees: transferFeesMap
       };
     } catch (error) {
-      console.error('❌ Get token config failed:', error);
+      if (this.debug) {
+        console.error('❌ Get token config failed:', error);
+      }
       throw error;
     }
   }
@@ -613,7 +639,9 @@ export class PybaraAgent {
 
       return result;
     } catch (error) {
-      console.error('Balance check failed:', error);
+      if (this.debug) {
+        console.error('Balance check failed:', error);
+      }
       throw error;
     }
   }

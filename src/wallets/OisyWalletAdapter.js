@@ -10,7 +10,7 @@ import { Principal } from '@dfinity/principal';
 import { WalletAdapter } from './BaseWalletAdapter.js';
 
 export class OisyWalletAdapter extends WalletAdapter {
-    constructor(isMainnet = true) {
+    constructor(isMainnet = true, debug = false) {
         super();
         
         // Wallet metadata
@@ -22,6 +22,7 @@ export class OisyWalletAdapter extends WalletAdapter {
         // Configuration
         this.isMainnet = isMainnet;
         this.host = isMainnet ? 'https://ic0.app' : 'http://127.0.0.1:4943';
+        this.debug = debug;
         
         // Internal state
         this.signer = null;
@@ -70,7 +71,9 @@ export class OisyWalletAdapter extends WalletAdapter {
             return this.principal;
             
         } catch (error) {
-            console.error('❌ Failed to connect to Oisy:', error);
+            if (this.debug) {
+                console.error('❌ Failed to connect to Oisy:', error);
+            }
             
             // Handle specific errors
             if (error.message?.includes('timeout')) {
@@ -92,15 +95,13 @@ export class OisyWalletAdapter extends WalletAdapter {
             try {
                 await this.signer.disconnect();
             } catch (error) {
-                console.warn('⚠️ Oisy disconnect error (ignoring):', error);
+                // Silent - disconnect errors are non-critical
             }
         }
         
         this.signer = null;
         this.principal = null;
         this.connected = false;
-        
-        console.log('🦦 Disconnected from Oisy');
     }
 
     /**
@@ -163,16 +164,19 @@ export class OisyWalletAdapter extends WalletAdapter {
             
             if (isCancellation) {
                 // User intentionally cancelled - this is not an error
-                console.log('ℹ️ [Oisy] User cancelled transaction');
                 throw this.createError('Transfer cancelled by user');
             }
             
             if (error.message?.includes('insufficient')) {
-                console.error('❌ Oisy transfer failed:', error);
+                if (this.debug) {
+                    console.error('❌ Oisy transfer failed:', error);
+                }
                 throw this.createError(`Insufficient ${token} balance`);
             }
             
-            console.error('❌ Oisy transfer failed:', error);
+            if (this.debug) {
+                console.error('❌ Oisy transfer failed:', error);
+            }
             throw this.createError(`Transfer failed: ${error.message}`);
         }
     }
@@ -188,7 +192,6 @@ export class OisyWalletAdapter extends WalletAdapter {
 
         // TODO: Implement balance query via agent
         // For now, return 0 (balance check happens in balance-checker.js)
-        console.warn('⚠️ Oisy balance query not implemented yet');
         return 0n;
     }
 

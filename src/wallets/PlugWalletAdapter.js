@@ -18,7 +18,7 @@ const LEDGER_CANISTERS = {
 };
 
 export class PlugWalletAdapter extends WalletAdapter {
-    constructor(isMainnet = true) {
+    constructor(isMainnet = true, debug = false) {
         super();
         
         // Wallet metadata
@@ -26,6 +26,7 @@ export class PlugWalletAdapter extends WalletAdapter {
         this.name = 'Plug Wallet';
         this.icon = '🔌';  // Platforms can override with custom logo
         this.website = 'https://plugwallet.ooo';
+        this.debug = debug;
         
         // Configuration
         this.isMainnet = isMainnet;
@@ -76,7 +77,9 @@ export class PlugWalletAdapter extends WalletAdapter {
             return this.principal;
             
         } catch (error) {
-            console.error('❌ Failed to connect to Plug:', error);
+            if (this.debug) {
+                console.error('❌ Failed to connect to Plug:', error);
+            }
             
             // Handle specific errors
             if (error.message?.includes('rejected')) {
@@ -98,14 +101,12 @@ export class PlugWalletAdapter extends WalletAdapter {
             try {
                 await window.ic.plug.disconnect();
             } catch (error) {
-                console.warn('⚠️ Plug disconnect error (ignoring):', error);
+                // Silent - disconnect errors are non-critical
             }
         }
         
         this.principal = null;
         this.connected = false;
-        
-        console.log('🔌 Disconnected from Plug');
     }
 
     /**
@@ -119,8 +120,6 @@ export class PlugWalletAdapter extends WalletAdapter {
         const { to, amount, ledgerCanisterId, token } = params;
         
         try {
-            console.log(`🔌 Plug: Requesting transfer of ${amount} ${token} to ${to}`);
-            
             // Plug's requestTransfer method
             // https://docs.plugwallet.ooo/getting-started/connect-to-plug#request-transfer
             const result = await window.ic.plug.requestTransfer({
@@ -128,8 +127,6 @@ export class PlugWalletAdapter extends WalletAdapter {
                 amount: Number(amount), // Plug expects number
                 canisterId: ledgerCanisterId
             });
-            
-            console.log(`🔌 Plug: Transfer result:`, result);
             
             // Plug returns { height: blockIndex } for ICRC-1
             const blockIndex = result.height || result.blockHeight || result;

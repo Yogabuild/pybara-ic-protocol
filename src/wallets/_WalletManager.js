@@ -6,7 +6,8 @@
  */
 
 export class WalletManager {
-    constructor() {
+    constructor(debug = false) {
+        this.debug = debug;
         this.wallets = new Map();
         this.activeWallet = null;
         this.listeners = new Map();
@@ -106,7 +107,9 @@ export class WalletManager {
             return principal;
             
         } catch (error) {
-            console.error(`❌ Failed to connect to ${wallet.name}:`, error);
+            if (this.debug) {
+                console.error(`❌ Failed to connect to ${wallet.name}:`, error);
+            }
             this.emit('error', { wallet: wallet.type, error });
             throw error;
         }
@@ -118,23 +121,25 @@ export class WalletManager {
      */
     async disconnect() {
         if (!this.activeWallet) {
-            console.warn('⚠️ No wallet connected');
             return;
         }
 
         const walletName = this.activeWallet.name;
-        console.log(`🔌 Disconnecting from ${walletName}...`);
         
         try {
             await this.activeWallet.disconnect();
             const walletType = this.activeWallet.type;
             this.activeWallet = null;
             
-            console.log(`✅ Disconnected from ${walletName}`);
+            if (this.debug) {
+                console.log(`✅ Disconnected from ${walletName}`);
+            }
             this.emit('disconnected', { wallet: walletType });
             
         } catch (error) {
-            console.error(`❌ Failed to disconnect from ${walletName}:`, error);
+            if (this.debug) {
+                console.error(`❌ Failed to disconnect from ${walletName}:`, error);
+            }
             throw error;
         }
     }
@@ -242,7 +247,9 @@ export class WalletManager {
             try {
                 callback(data);
             } catch (error) {
-                console.error(`Error in ${event} listener:`, error);
+                if (this.debug) {
+                    console.error(`Error in ${event} listener:`, error);
+                }
             }
         });
     }
