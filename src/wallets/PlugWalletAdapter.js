@@ -7,6 +7,7 @@
 
 import { Principal } from '@dfinity/principal';
 import { WalletAdapter } from './BaseWalletAdapter.js';
+import { createLedgerActor } from '../utils/ledger-actor.js';
 
 // Ledger canister IDs for whitelist
 const LEDGER_CANISTERS = {
@@ -111,6 +112,7 @@ export class PlugWalletAdapter extends WalletAdapter {
 
     /**
      * Execute ICRC-1 token transfer
+     * Uses Plug's agent for direct ICRC-1 calls (requestTransfer is ICP-only)
      */
     async transfer(params) {
         if (!this.connected) {
@@ -120,40 +122,78 @@ export class PlugWalletAdapter extends WalletAdapter {
         const { to, amount, ledgerCanisterId, token } = params;
         
         try {
-            // Plug's requestTransfer method
-            // https://docs.plugwallet.ooo/getting-started/connect-to-plug#request-transfer
-            const result = await window.ic.plug.requestTransfer({
-                to: to,
-                amount: Number(amount), // Plug expects number
-                canisterId: ledgerCanisterId
-            });
+            // Get Plug's agent to make direct ICRC-1 calls
+            // NOTE: requestTransfer() only works for ICP, so we use the agent directly
+            const agent = window.ic.plug.agent;
             
-            // Plug returns { height: blockIndex } for ICRC-1
-            const blockIndex = result.height || result.blockHeight || result;
-            
-            if (!blockIndex || blockIndex === 0) {
-                throw this.createError('Plug returned invalid block index. Transfer may have failed.');
+            if (!agent) {
+                throw this.createError('Plug agent not available. Please reconnect.');
             }
             
-            // CRITICAL: Verify the transfer actually happened
-            // Plug has a bug where it returns success without executing the transfer
-            console.log(`🔌 Plug: Verifying transfer on-chain (block ${blockIndex})...`);
+            if (this.debug) {
+                console.log(`🔌 Plug: Initiating ${token} transfer via agent...`);
+                console.log(`   To: ${to}`);
+                console.log(`   Amount: ${amount}`);
+                console.log(`   Ledger: ${ledgerCanisterId}`);
+            }
             
-            // Check if user's balance actually decreased
-            const balanceAfter = await this.getBalance(ledgerCanisterId, token);
-            console.log(`🔌 Plug: Balance after transfer: ${balanceAfter}`);
+            // Create ledger actor using Plug's agent
+            const ledger = createLedgerActor(ledgerCanisterId, agent);
             
-            // Note: We can't reliably verify without knowing balance before
-            // The backend will do proper on-chain verification
+            // Build ICRC-1 transfer parameters
+            const transferParams = {
+                to: {
+                    owner: Principal.fromText(to),
+                    subaccount: [] // Empty array = default subaccount
+                },
+                amount: BigInt(amount),
+                fee: [], // Let ledger calculate fee
+                memo: [], // Optional
+                from_subaccount: [], // Default subaccount
+                created_at_time: [] // Let ledger timestamp
+            };
             
-            // Normalize return value
+            // Execute transfer via ICRC-1
+            const result = await ledger.icrc1_transfer(transferParams);
+            
+            // Check result
+            if (result.Err) {
+                const errorType = Object.keys(result.Err)[0];
+                const errorValue = result.Err[errorType];
+                
+                if (this.debug) {
+                    console.error('❌ Plug transfer error:', errorType, errorValue);
+                }
+                
+                // Handle specific ICRC-1 errors
+                if (errorType === 'InsufficientFunds') {
+                    throw this.createError(`Insufficient ${token} balance`);
+                }
+                if (errorType === 'BadFee') {
+                    throw this.createError(`Incorrect fee. Expected: ${errorValue.expected_fee}`);
+                }
+                if (errorType === 'TemporarilyUnavailable') {
+                    throw this.createError('Ledger temporarily unavailable. Please try again.');
+                }
+                
+                throw this.createError(`Transfer failed: ${errorType}`);
+            }
+            
+            const blockIndex = result.Ok;
+            
+            if (this.debug) {
+                console.log(`✅ Plug transfer successful: Block ${blockIndex}`);
+            }
+            
             return Number(blockIndex);
             
         } catch (error) {
-            console.error('❌ Plug transfer failed:', error);
+            if (this.debug) {
+                console.error('❌ Plug transfer failed:', error);
+            }
             
             // Classify error for better user messages
-            if (error.message?.includes('insufficient')) {
+            if (error.message?.includes('InsufficientFunds') || error.message?.includes('Insufficient')) {
                 throw this.createError(`Insufficient ${token} balance`);
             }
             if (error.message?.includes('rejected') || error.message?.includes('denied')) {
@@ -162,9 +202,6 @@ export class PlugWalletAdapter extends WalletAdapter {
             if (error.message?.includes('timeout')) {
                 throw this.createError('Transfer timeout. Please try again.');
             }
-            if (error.message?.includes('invalid block')) {
-                throw this.createError('Transfer failed - Plug returned invalid response');
-            }
             
             throw this.createError(`Transfer failed: ${error.message}`);
         }
@@ -172,7 +209,7 @@ export class PlugWalletAdapter extends WalletAdapter {
 
     /**
      * Get balance for a token
-     * Plug has a built-in balance API
+     * Uses agent for direct ICRC-1 balance query
      */
     async getBalance(ledgerCanisterId, token) {
         if (!this.connected) {
@@ -180,20 +217,25 @@ export class PlugWalletAdapter extends WalletAdapter {
         }
 
         try {
-            // Plug's requestBalance returns array of token balances
-            const balances = await window.ic.plug.requestBalance();
+            const agent = window.ic.plug.agent;
             
-            // Find the token by canister ID
-            const tokenBalance = balances.find(
-                b => b.canisterId === ledgerCanisterId
-            );
-            
-            if (tokenBalance) {
-                return BigInt(tokenBalance.amount);
+            if (!agent) {
+                console.warn('⚠️ Plug agent not available for balance query');
+                return 0n;
             }
             
-            // Token not found in balances (might be zero balance)
-            return 0n;
+            // Create ledger actor
+            const ledger = createLedgerActor(ledgerCanisterId, agent);
+            
+            // Query balance via ICRC-1
+            const account = {
+                owner: Principal.fromText(this.principal),
+                subaccount: [] // Default subaccount
+            };
+            
+            const balance = await ledger.icrc1_balance_of(account);
+            
+            return balance;
             
         } catch (error) {
             console.warn('⚠️ Plug balance query failed:', error);

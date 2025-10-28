@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.4.0] - 2025-10-28
+
+### Fixed
+- **CRITICAL: Plug Wallet ICRC-1 Support**
+  - Plug's `requestTransfer()` API is ICP-only (confirmed by Plug team)
+  - Updated `PlugWalletAdapter` to use `window.ic.plug.agent` for direct ICRC-1 calls
+  - Now supports ckBTC, ckETH, ckUSDC, ckUSDT transfers via Plug
+  - Uses same pattern as NFID: `createLedgerActor()` + `icrc1_transfer()`
+  - Updated `getBalance()` to use ICRC-1 queries instead of `requestBalance()`
+
+### Added
+- Wallet implementation details in README
+- Table showing wallet support for ICP vs ICRC-1 tokens
+- Explanation of Plug-specific ICRC-1 implementation approach
+
+### Why This Matters
+- Plug is the most popular ICP wallet (~40-50% market share)
+- Previously only worked for ICP transfers
+- Now fully supports all ICRC-1 tokens
+- Maintains compatibility with Plug's authentication flow
+
+---
+
 ## [2.2.0] - 2025-10-26
 
 ### Added

@@ -164,6 +164,20 @@ const principal = manager.getPrincipal();
 await manager.disconnect();
 ```
 
+**Supported Wallets:**
+
+| Wallet | ICP | ICRC-1 (ckBTC, ckETH, etc.) | Implementation |
+|--------|-----|------------------------------|----------------|
+| **Oisy** | ✅ | ✅ | `@dfinity/oisy-wallet-signer` |
+| **Plug** | ✅ | ✅ | `window.ic.plug.agent` (direct ICRC-1) |
+| **NFID** | ✅ | ✅ | `@dfinity/auth-client` |
+
+**Implementation Details:**
+
+- **Oisy**: Uses official `@dfinity/oisy-wallet-signer` SDK for all transfers
+- **NFID**: Uses Internet Identity delegation with direct ledger calls
+- **Plug**: Plug's `requestTransfer()` API is ICP-only. For ICRC-1 tokens (ckBTC, ckETH, ckUSDC, ckUSDT), we use `window.ic.plug.agent` to call `icrc1_transfer()` directly on ledger canisters. This provides full ICRC-1 support while maintaining Plug's authentication flow.
+
 ### Currency Utilities
 
 ```javascript
@@ -378,14 +392,15 @@ MIT - See [LICENSE](./LICENSE)
 
 ## Status
 
-**Version:** 2.3.0  
+**Version:** 2.4.0  
 **Stability:** Production-ready  
 **License:** MIT
 
-**Recent Changes (v2.3.0):**
-- ⚡ Debug flag for production (clean console)
-- ⚡ All wallet adapter logs now controllable
-- ⚡ Better logging control for integrators
+**Recent Changes (v2.4.0):**
+- 🔌 **CRITICAL FIX**: Plug wallet now supports all ICRC-1 tokens
+- ✅ Plug works with ckBTC, ckETH, ckUSDC, ckUSDT (via direct agent calls)
+- 📚 Documented wallet-specific implementation details
+- 🐛 Fixed checkout error handling scope issues
 
 ---
 
