@@ -6,7 +6,7 @@
 **JavaScript SDK for Pybara crypto payment gateway.** Platform-agnostic Internet Computer integration for e-commerce.
 
 **Supports:** ICP, ckBTC, ckETH, ckUSDC, ckUSDT  
-**Wallets:** Oisy, Plug, NFID
+**Wallets:** Oisy, Plug (NFID available but disabled by default)
 
 ---
 
@@ -379,16 +379,16 @@ const agent = new PybaraAgent({
 Platform-agnostic wallet control - works across WooCommerce, Shopify, and all platforms:
 
 ```javascript
-// Enable all wallets (default)
+// Enable Oisy + Plug (default)
 const agent = new PybaraAgent({
   canisterId: '...',
-  enabledWallets: ['oisy', 'plug', 'nfid']
+  enabledWallets: ['oisy', 'plug']  // NFID excluded due to SDK quality issues
 });
 
-// Enable only web-based wallets (no extensions)
+// Enable all wallets (including NFID)
 const agent = new PybaraAgent({
   canisterId: '...',
-  enabledWallets: ['oisy', 'nfid']
+  enabledWallets: ['oisy', 'plug', 'nfid']  // NFID has UX issues - use at own risk
 });
 
 // Enable only Plug
@@ -407,7 +407,7 @@ const agent = new PybaraAgent({
 **Platform implementations:**
 ```javascript
 // WooCommerce: Read from admin settings
-const enabledWallets = window.wooIcpParams?.enabledWallets || ['oisy', 'plug', 'nfid'];
+const enabledWallets = window.wooIcpParams?.enabledWallets || ['oisy', 'plug'];
 const agent = new PybaraAgent({ enabledWallets });
 
 // Shopify: Read from app config

@@ -77,7 +77,8 @@ export const SUPPORTED_TOKENS = ['ICP', 'ckBTC', 'ckETH', 'ckUSDC', 'ckUSDT'];
 export const SUPPORTED_WALLETS = ['oisy', 'plug', 'stoic', 'nfid', 'bitfinity'];
 
 // Default enabled wallets (platforms can override)
-export const DEFAULT_ENABLED_WALLETS = ['oisy', 'plug', 'nfid'];
+// NFID disabled: Vanilla SDK has poor UX and broken II login (as of Oct 2025)
+export const DEFAULT_ENABLED_WALLETS = ['oisy', 'plug'];
 
 // 💵 TOKEN DECIMALS ============================================================
 
