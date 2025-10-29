@@ -73,8 +73,11 @@ export const PAYMENT_BUFFER_PERCENT = 10;
 // Supported tokens
 export const SUPPORTED_TOKENS = ['ICP', 'ckBTC', 'ckETH', 'ckUSDC', 'ckUSDT'];
 
-// Supported wallets
+// Supported wallets (available for registration)
 export const SUPPORTED_WALLETS = ['oisy', 'plug', 'stoic', 'nfid', 'bitfinity'];
+
+// Default enabled wallets (platforms can override)
+export const DEFAULT_ENABLED_WALLETS = ['oisy', 'plug', 'nfid'];
 
 // 💵 TOKEN DECIMALS ============================================================
 
@@ -96,6 +99,7 @@ export const DEFAULT_CONFIG = {
   isMainnet: true,
   tokens: SUPPORTED_TOKENS,
   wallets: SUPPORTED_WALLETS,
+  enabledWallets: DEFAULT_ENABLED_WALLETS,  // Platform-agnostic wallet activation
   icrc1IndexingDelay: ICRC1_INDEXING_DELAY,
   walletApprovalTimeout: WALLET_APPROVAL_TIMEOUT,
   backendConfirmationTimeout: BACKEND_CONFIRMATION_TIMEOUT,

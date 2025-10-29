@@ -32,11 +32,12 @@ export class PybaraAgent {
     this.actor = null;
     this.debug = fullConfig.debug;
     this.walletIcons = fullConfig.walletIcons || {}; // Custom wallet icon URLs
+    this.enabledWallets = fullConfig.enabledWallets || ['oisy', 'plug', 'nfid']; // Platform-agnostic wallet activation
     
     // Initialize wallet system
     this.walletManager = new WalletManager(this.debug);
     
-    // Register wallet adapters
+    // Register ALL wallet adapters (regardless of enabledWallets)
     this.walletManager.registerWallet(new OisyWalletAdapter(this.isMainnet, this.debug));
     this.walletManager.registerWallet(new PlugWalletAdapter(this.isMainnet, this.debug));
     this.walletManager.registerWallet(new NFIDWalletAdapter(this.debug));
@@ -50,7 +51,8 @@ export class PybaraAgent {
       console.log('🦫 Pybara Payment Agent initialized');
       console.log('   Canister:', this.canisterId);
       console.log('   Network:', this.isMainnet ? 'mainnet' : 'local');
-      console.log('   Supported wallets:', this.walletManager.getAllWallets().map(w => w.name).join(', '));
+      console.log('   Registered wallets:', this.walletManager.getAllWallets().map(w => w.name).join(', '));
+      console.log('   Enabled wallets:', this.enabledWallets.join(', '));
     }
   }
 
@@ -75,17 +77,19 @@ export class PybaraAgent {
   }
 
   /**
-   * Get available wallets (installed/accessible)
+   * Get available wallets (installed/accessible AND enabled)
    */
   getAvailableWallets() {
-    return this.walletManager.getWalletsInfo().filter(w => w.available);
+    return this.walletManager.getWalletsInfo()
+      .filter(w => w.available && this.enabledWallets.includes(w.type));
   }
 
   /**
-   * Get all wallets (for UI display)
+   * Get all wallets (for UI display, filtered by enabled wallets)
    */
   getAllWallets() {
-    return this.walletManager.getWalletsInfo();
+    return this.walletManager.getWalletsInfo()
+      .filter(w => this.enabledWallets.includes(w.type));
   }
 
   /**

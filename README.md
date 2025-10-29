@@ -81,11 +81,13 @@ import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
 const agent = new PybaraAgent(config);
 
-// Wallet
+// Wallet Management
 await agent.connectWallet('oisy');  // or 'plug', 'nfid'
 await agent.disconnectWallet();
 agent.isWalletConnected();
 agent.walletManager.getPrincipal();
+agent.getAvailableWallets();  // Returns only enabled wallets
+agent.getAllWallets();  // Returns all enabled wallets for UI display
 
 // Payment Lifecycle
 await agent.calculateAmount(usdAmount, token);
@@ -336,13 +338,13 @@ const config = {
   // Optional
   isMainnet: true,
   tokens: ['ICP', 'ckBTC', 'ckETH', 'ckUSDC', 'ckUSDT'],
-  wallets: ['oisy', 'plug', 'nfid'],
+  enabledWallets: ['oisy', 'plug', 'nfid'],  // Platform-agnostic wallet activation (NEW in v2.5.0)
   icrc1IndexingDelay: 8000,           // 8 seconds
   walletApprovalTimeout: 300000,      // 5 minutes
   backendConfirmationTimeout: 60000,  // 1 minute
   maxRetryAttempts: 3,
   retryDelay: 2000,                   // 2 seconds
-  debug: false                        // Controls wallet adapter logs (NEW in v2.3.0)
+  debug: false                        // Controls wallet adapter logs
 };
 ```
 
@@ -371,6 +373,58 @@ const agent = new PybaraAgent({
 - ICRC-1 ledger interactions
 
 **Production best practice:** Set `debug: false` for clean user experience
+
+### Wallet Activation (v2.5.0+)
+
+Platform-agnostic wallet control - works across WooCommerce, Shopify, and all platforms:
+
+```javascript
+// Enable all wallets (default)
+const agent = new PybaraAgent({
+  canisterId: '...',
+  enabledWallets: ['oisy', 'plug', 'nfid']
+});
+
+// Enable only web-based wallets (no extensions)
+const agent = new PybaraAgent({
+  canisterId: '...',
+  enabledWallets: ['oisy', 'nfid']
+});
+
+// Enable only Plug
+const agent = new PybaraAgent({
+  canisterId: '...',
+  enabledWallets: ['plug']
+});
+```
+
+**How it works:**
+- SDK registers ALL wallet adapters internally
+- `enabledWallets` filters which wallets appear in UI
+- `getAvailableWallets()` returns only enabled + installed wallets
+- `getAllWallets()` returns all enabled wallets for display
+
+**Platform implementations:**
+```javascript
+// WooCommerce: Read from admin settings
+const enabledWallets = window.wooIcpParams?.enabledWallets || ['oisy', 'plug', 'nfid'];
+const agent = new PybaraAgent({ enabledWallets });
+
+// Shopify: Read from app config
+const enabledWallets = shopifyConfig.wallets;
+const agent = new PybaraAgent({ enabledWallets });
+
+// Custom platform: Hardcode or use environment variables
+const agent = new PybaraAgent({ 
+  enabledWallets: process.env.ENABLED_WALLETS.split(',') 
+});
+```
+
+**Benefits:**
+- ✅ No platform-specific filtering code
+- ✅ Consistent behavior across all platforms  
+- ✅ Single source of truth (SDK)
+- ✅ Easy to add/remove wallets per deployment
 
 ---
 

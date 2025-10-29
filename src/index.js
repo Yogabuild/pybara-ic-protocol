@@ -20,6 +20,7 @@ export {
     PAYMENT_BUFFER_PERCENT,
     SUPPORTED_TOKENS,
     SUPPORTED_WALLETS,
+    DEFAULT_ENABLED_WALLETS,  // Platform-agnostic wallet activation defaults
     TOKEN_DECIMALS,
     DEFAULT_CONFIG,
     createConfig
