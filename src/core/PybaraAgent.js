@@ -16,7 +16,7 @@ import { NFIDWalletAdapter } from '../wallets/NFIDWalletAdapter.js';
 import { getLedgerCanisterId, LEDGER_IDS } from '../utils/ledger-config.js';
 import { checkBalance, checkSufficientBalance, checkMultipleBalances, formatBalance } from '../utils/balance-checker.js';
 import { idlFactory } from './canister-idl.js';
-import { createConfig } from './config.js';
+import { createConfig, getDefaultConfig, DEFAULT_ENABLED_WALLETS } from './config.js';
 import * as CurrencyUtils from '../utils/currency-logic.js';
 import { CurrencyFormatter } from '../utils/currency-formatter.js';
 
@@ -32,7 +32,11 @@ export class PybaraAgent {
     this.actor = null;
     this.debug = fullConfig.debug;
     this.walletIcons = fullConfig.walletIcons || {}; // Custom wallet icon URLs
-    this.enabledWallets = fullConfig.enabledWallets || ['oisy', 'plug', 'nfid']; // Platform-agnostic wallet activation
+    
+    // Platform-agnostic wallet activation with SDK filtering
+    // SDK is the authority: only wallets in DEFAULT_ENABLED_WALLETS are actually enabled
+    const requestedWallets = fullConfig.enabledWallets || DEFAULT_ENABLED_WALLETS;
+    this.enabledWallets = requestedWallets.filter(wallet => DEFAULT_ENABLED_WALLETS.includes(wallet));
     
     // Initialize wallet system
     this.walletManager = new WalletManager(this.debug);

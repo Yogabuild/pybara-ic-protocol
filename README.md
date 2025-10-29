@@ -374,57 +374,80 @@ const agent = new PybaraAgent({
 
 **Production best practice:** Set `debug: false` for clean user experience
 
-### Wallet Activation (v2.5.0+)
+### Wallet Activation & Control
 
-Platform-agnostic wallet control - works across WooCommerce, Shopify, and all platforms:
+**SDK is the single source of truth for wallet availability.**
+
+#### How Wallet Control Works
+
+**Double-Layer System:**
+1. **SDK Layer** (Authority): `DEFAULT_ENABLED_WALLETS` in `src/core/config.js`
+2. **Platform Layer** (Optional): Platform-specific filtering (e.g., WooCommerce admin checkboxes)
+
+**Runtime Behavior:**
+```javascript
+// SDK filters wallets at runtime
+const requestedWallets = config.enabledWallets || DEFAULT_ENABLED_WALLETS;
+this.enabledWallets = requestedWallets.filter(wallet => 
+  DEFAULT_ENABLED_WALLETS.includes(wallet)
+);
+```
+
+**Example:**
+```javascript
+// Platform passes: ['oisy', 'plug', 'nfid']
+// SDK's DEFAULT_ENABLED_WALLETS: ['oisy', 'plug']
+// Result: ['oisy', 'plug'] ← NFID filtered out by SDK
+```
+
+#### Default Configuration
 
 ```javascript
-// Enable Oisy + Plug (default)
+import { DEFAULT_ENABLED_WALLETS } from '@yogabuild/pybara-sdk';
+
+console.log(DEFAULT_ENABLED_WALLETS); // ['oisy', 'plug']
+```
+
+#### Usage
+
+```javascript
+// Use SDK defaults (recommended)
 const agent = new PybaraAgent({
-  canisterId: '...',
-  enabledWallets: ['oisy', 'plug']  // NFID excluded due to SDK quality issues
+  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai'
+  // enabledWallets defaults to DEFAULT_ENABLED_WALLETS
 });
 
-// Enable all wallets (including NFID)
+// Platform can request specific wallets (SDK will filter)
 const agent = new PybaraAgent({
-  canisterId: '...',
-  enabledWallets: ['oisy', 'plug', 'nfid']  // NFID has UX issues - use at own risk
-});
-
-// Enable only Plug
-const agent = new PybaraAgent({
-  canisterId: '...',
-  enabledWallets: ['plug']
+  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai',
+  enabledWallets: ['oisy', 'plug', 'nfid']  // SDK filters → ['oisy', 'plug']
 });
 ```
 
-**How it works:**
-- SDK registers ALL wallet adapters internally
-- `enabledWallets` filters which wallets appear in UI
-- `getAvailableWallets()` returns only enabled + installed wallets
-- `getAllWallets()` returns all enabled wallets for display
+#### Why This Architecture?
 
-**Platform implementations:**
-```javascript
-// WooCommerce: Read from admin settings
-const enabledWallets = window.wooIcpParams?.enabledWallets || ['oisy', 'plug'];
-const agent = new PybaraAgent({ enabledWallets });
+**Platform-agnostic consistency:**
+- WooCommerce admin might enable NFID → SDK filters it out
+- Shopify admin might enable NFID → SDK filters it out
+- Direct integrations get filtered → SDK is consistent everywhere
 
-// Shopify: Read from app config
-const enabledWallets = shopifyConfig.wallets;
-const agent = new PybaraAgent({ enabledWallets });
+**Single source of truth:**
+- Change `DEFAULT_ENABLED_WALLETS` in SDK → all platforms update
+- No need to change every platform integration
+- No drift between platforms
 
-// Custom platform: Hardcode or use environment variables
-const agent = new PybaraAgent({ 
-  enabledWallets: process.env.ENABLED_WALLETS.split(',') 
-});
-```
+#### NFID Status
 
-**Benefits:**
-- ✅ No platform-specific filtering code
-- ✅ Consistent behavior across all platforms  
-- ✅ Single source of truth (SDK)
-- ✅ Easy to add/remove wallets per deployment
+**Disabled by default** (Oct 2025):
+- Uses deprecated `@nfid/embed` SDK (poor UX, broken II login)
+- IdentityKit is React-only (incompatible with platform-agnostic architecture)
+- Migration to `@slide-computer/signer` requires 20-30 hours
+- See [NFID_STATUS.md](../pybara-hub/NFID_STATUS.md)
+
+**To enable NFID:**
+1. Add `'nfid'` to `DEFAULT_ENABLED_WALLETS` in `src/core/config.js`
+2. Rebuild SDK
+3. All platforms automatically get NFID (not recommended)
 
 ---
 
