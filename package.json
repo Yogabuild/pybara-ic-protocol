@@ -1,6 +1,6 @@
 {
   "name": "@yogabuild/pybara-sdk",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "JavaScript SDK for Pybara payment gateway - platform-agnostic IC integration",
   "author": "Yogabuild",
   "license": "MIT",
