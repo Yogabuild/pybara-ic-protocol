@@ -1,44 +1,137 @@
 # Pybara Payment Flow
 
-**Current Version:** SDK v2.3.0 / Backend v2.2
+**Current Version:** SDK v2.5.0 / Backend v2.2
+
+Complete guide to implementing Pybara payments in your application.
 
 ---
 
-## 🔄 Complete Payment Flow
+## 🚀 Quick Example
 
-### Step 1: Initialize Payment
 ```javascript
-const calculation = await gateway.createPaymentRecord(
-  orderId,
-  siteUrl,
-  siteName,
-  usdAmount,
-  token,
-  merchantPrincipal,
-  walletPrincipal
+import { PybaraAgent } from '@yogabuild/pybara-sdk';
+
+const agent = new PybaraAgent({
+  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai',
+  debug: false
+});
+
+// 1. Connect wallet
+await agent.connectWallet('oisy');
+
+// 2. Calculate payment
+const calc = await agent.calculateAmount(49.99, 'ckBTC');
+
+// 3. Send payment to Pybara Core
+const blockIndex = await agent.sendCustomerPaymentToPybaraCore(
+  calc.expected_amount,
+  'zvgwv-zyaaa-aaaac-qchaq-cai',
+  'ckBTC'
+);
+
+// 4. Create payment record
+const payment = await agent.createPaymentRecord({
+  orderId: 12345,
+  siteUrl: 'https://mystore.com',
+  siteName: 'My Store',
+  platform: 'woocommerce',
+  usdAmount: 49.99,
+  token: 'ckBTC',
+  merchantPrincipal: 'merchant-principal-id',
+  userPrincipal: agent.walletManager.getPrincipal(),
+  wallet: 'Oisy'
+});
+
+// 5. Verify and auto-execute payout (99% merchant, 1% platform)
+await agent.verifyAndRecordCustomerPayment(
+  payment.payment_id,
+  12345,
+  'https://mystore.com',
+  'merchant-principal-id',
+  blockIndex,
+  calc.expected_amount
 );
 ```
 
-**Returns:** Payment ID, expected token amount, price used
-
 ---
 
-### Step 2: Customer Sends Tokens
-Customer uses their wallet (Oisy, Plug, NFID, etc.) to send tokens to Pybara Core canister.
+## 🔄 Detailed Payment Flow
 
-**Result:** Blockchain transaction with block index
-
----
-
-### Step 3: Verify & Auto-Execute Payout
+### Step 1: Connect Wallet
 ```javascript
-const result = await gateway.verifyAndRecordCustomerPayment(
-  paymentId,
-  orderId,
-  siteUrl,
-  merchantPrincipal,
+await agent.connectWallet('oisy');  // or 'plug'
+```
+
+**What happens:**
+- Opens wallet authentication popup
+- User approves connection
+- Agent stores wallet principal and connection state
+
+---
+
+### Step 2: Calculate Payment Amount
+```javascript
+const calc = await agent.calculateAmount(49.99, 'ckBTC');
+// Returns: { expected_amount: 123456789n, price_used: 0.000042 }
+```
+
+**What happens:**
+- Fetches current token price from Pybara Core
+- Converts USD amount to token amount
+- Returns expected amount in smallest unit (e.g., satoshis for ckBTC)
+
+---
+
+### Step 3: Send Customer Payment
+```javascript
+const blockIndex = await agent.sendCustomerPaymentToPybaraCore(
+  calc.expected_amount,
+  'zvgwv-zyaaa-aaaac-qchaq-cai',
+  'ckBTC'
+);
+```
+
+**What happens:**
+- Opens wallet signing popup
+- User approves transaction
+- Tokens transferred to Pybara Core canister
+- Returns blockchain transaction index
+
+---
+
+### Step 4: Create Payment Record
+```javascript
+const payment = await agent.createPaymentRecord({
+  orderId: 12345,
+  siteUrl: 'https://mystore.com',
+  siteName: 'My Store',
+  platform: 'woocommerce',
+  usdAmount: 49.99,
+  token: 'ckBTC',
+  merchantPrincipal: 'merchant-principal-id',
+  userPrincipal: agent.walletManager.getPrincipal(),
+  wallet: 'Oisy'
+});
+```
+
+**What happens:**
+- Creates payment record in Pybara Core
+- Links payment to order and merchant
+- Returns payment ID for verification
+
+**Returns:** `{ payment_id, expected_amount, price_used }`
+
+---
+
+### Step 5: Verify & Auto-Execute Payout
+```javascript
+await agent.verifyAndRecordCustomerPayment(
+  payment.payment_id,
+  12345,
+  'https://mystore.com',
+  'merchant-principal-id',
   blockIndex,
-  receivedAmount
+  calc.expected_amount
 );
 ```
 
@@ -90,4 +183,13 @@ const result = await gateway.verifyAndRecordCustomerPayment(
 
 ---
 
-**Last Updated:** October 28, 2025
+---
+
+## 📚 Related Documentation
+
+- [README.md](./README.md) - SDK overview and API reference
+- [CHANGELOG.md](./CHANGELOG.md) - Version history
+
+---
+
+**Last Updated:** October 29, 2025

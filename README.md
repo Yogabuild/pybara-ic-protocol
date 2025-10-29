@@ -23,52 +23,27 @@ npm install @yogabuild/pybara-sdk
 ```javascript
 import { PybaraAgent } from '@yogabuild/pybara-sdk';
 
-// Initialize agent
+// Initialize
 const agent = new PybaraAgent({
   canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai',
-  host: 'https://icp-api.io',
-  debug: false  // Set to true for verbose wallet/transaction logs
+  debug: false
 });
 
-// Connect wallet
+// Connect wallet & execute payment
 await agent.connectWallet('oisy');
-
-// Calculate payment amount
 const calc = await agent.calculateAmount(49.99, 'ckBTC');
-console.log('Expected amount:', calc.expected_amount);
-console.log('Price used:', calc.price_used);
-
-// Send customer payment to Pybara Core
 const blockIndex = await agent.sendCustomerPaymentToPybaraCore(
   calc.expected_amount,
   'zvgwv-zyaaa-aaaac-qchaq-cai',
   'ckBTC'
 );
 
-// Create payment record
-const payment = await agent.createPaymentRecord({
-  orderId: 12345,
-  siteUrl: 'https://mystore.com',
-  siteName: 'My Store',
-  platform: 'woocommerce',
-  usdAmount: 49.99,
-  token: 'ckBTC',
-  merchantPrincipal: 'merchant-principal-id',
-  userPrincipal: agent.walletManager.getPrincipal(),
-  wallet: 'Oisy'
-});
-
-// Verify customer payment on-chain and auto-execute payout
-// Payout (99% merchant, 1% platform) happens automatically!
-await agent.verifyAndRecordCustomerPayment(
-  payment.payment_id,
-  12345,
-  'https://mystore.com',
-  'merchant-principal-id',
-  blockIndex,
-  calc.expected_amount
-);
+// Verify & auto-execute payout (99% merchant, 1% platform)
+const payment = await agent.createPaymentRecord({...});
+await agent.verifyAndRecordCustomerPayment(...);
 ```
+
+**See [PAYMENT_FLOW.md](./PAYMENT_FLOW.md) for complete payment guide with detailed examples.**
 
 ---
 
@@ -374,80 +349,30 @@ const agent = new PybaraAgent({
 
 **Production best practice:** Set `debug: false` for clean user experience
 
-### Wallet Activation & Control
+### Wallet Control
 
-**SDK is the single source of truth for wallet availability.**
-
-#### How Wallet Control Works
-
-**Double-Layer System:**
-1. **SDK Layer** (Authority): `DEFAULT_ENABLED_WALLETS` in `src/core/config.js`
-2. **Platform Layer** (Optional): Platform-specific filtering (e.g., WooCommerce admin checkboxes)
-
-**Runtime Behavior:**
-```javascript
-// SDK filters wallets at runtime
-const requestedWallets = config.enabledWallets || DEFAULT_ENABLED_WALLETS;
-this.enabledWallets = requestedWallets.filter(wallet => 
-  DEFAULT_ENABLED_WALLETS.includes(wallet)
-);
-```
-
-**Example:**
-```javascript
-// Platform passes: ['oisy', 'plug', 'nfid']
-// SDK's DEFAULT_ENABLED_WALLETS: ['oisy', 'plug']
-// Result: ['oisy', 'plug'] ← NFID filtered out by SDK
-```
-
-#### Default Configuration
+**SDK filters `enabledWallets` against `DEFAULT_ENABLED_WALLETS` at runtime.**
 
 ```javascript
 import { DEFAULT_ENABLED_WALLETS } from '@yogabuild/pybara-sdk';
 
 console.log(DEFAULT_ENABLED_WALLETS); // ['oisy', 'plug']
-```
 
-#### Usage
-
-```javascript
-// Use SDK defaults (recommended)
-const agent = new PybaraAgent({
-  canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai'
-  // enabledWallets defaults to DEFAULT_ENABLED_WALLETS
-});
-
-// Platform can request specific wallets (SDK will filter)
+// SDK filters platform requests
 const agent = new PybaraAgent({
   canisterId: 'zvgwv-zyaaa-aaaac-qchaq-cai',
-  enabledWallets: ['oisy', 'plug', 'nfid']  // SDK filters → ['oisy', 'plug']
+  enabledWallets: ['oisy', 'plug', 'nfid']  // → SDK filters to ['oisy', 'plug']
 });
 ```
 
-#### Why This Architecture?
+**Architecture:**
+- SDK is authority: only wallets in `DEFAULT_ENABLED_WALLETS` are enabled
+- Platforms request wallets → SDK validates → consistent behavior everywhere
+- Change SDK → all platforms update automatically
 
-**Platform-agnostic consistency:**
-- WooCommerce admin might enable NFID → SDK filters it out
-- Shopify admin might enable NFID → SDK filters it out
-- Direct integrations get filtered → SDK is consistent everywhere
-
-**Single source of truth:**
-- Change `DEFAULT_ENABLED_WALLETS` in SDK → all platforms update
-- No need to change every platform integration
-- No drift between platforms
-
-#### NFID Status
-
-**Disabled by default** (Oct 2025):
-- Uses deprecated `@nfid/embed` SDK (poor UX, broken II login)
-- IdentityKit is React-only (incompatible with platform-agnostic architecture)
-- Migration to `@slide-computer/signer` requires 20-30 hours
-- See [NFID_STATUS.md](../pybara-hub/NFID_STATUS.md)
-
-**To enable NFID:**
-1. Add `'nfid'` to `DEFAULT_ENABLED_WALLETS` in `src/core/config.js`
-2. Rebuild SDK
-3. All platforms automatically get NFID (not recommended)
+**NFID disabled by default:**
+- Reason: deprecated `@nfid/embed` SDK, broken II login
+- To enable: add to `DEFAULT_ENABLED_WALLETS`, rebuild (not recommended)
 
 ---
 
