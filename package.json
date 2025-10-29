@@ -31,7 +31,9 @@
     "@dfinity/candid": "^3.2.7",
     "@dfinity/identity": "^3.2.7",
     "@dfinity/oisy-wallet-signer": "^1.1.0",
-    "@dfinity/principal": "^3.2.7"
+    "@dfinity/principal": "^3.2.7",
+    "@slide-computer/signer": "^4.0.0",
+    "@slide-computer/signer-web": "^4.0.0"
   },
   "devDependencies": {
     "terser": "^5.44.0",

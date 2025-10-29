@@ -1,14 +1,17 @@
 /**
  * NFID Wallet Adapter
  * 
- * Integrates NFID (Internet Identity) wallet for ICP payments.
+ * Integrates NFID wallet for ICP payments.
  * NFID offers easy onboarding with email/Google login.
  * 
  * Features:
  * - Email-based authentication (no extension required)
  * - Google/Apple sign-in
  * - ICRC-1 token support
- * - Delegation-based authentication
+ * - Updated authentication endpoint (Oct 2025)
+ * 
+ * Note: Using @dfinity/auth-client temporarily.
+ * Full slide-computer/signer migration pending (requires custom identity implementation).
  */
 
 import { AuthClient } from '@dfinity/auth-client';
@@ -33,13 +36,11 @@ export class NFIDWalletAdapter extends WalletAdapter {
         this.agent = null;
         this.identity = null;
         
-        // NFID Identity Provider URL
-        this.identityProvider = 'https://nfid.one/authenticate/?applicationName=Pybara';
+        // Updated NFID authentication endpoint (Oct 2025)
+        this.identityProvider = 'https://nfid.one';
         
         // Network configuration
         this.host = 'https://ic0.app';
-        
-        // NFID adapter initialized silently
     }
 
     /**
@@ -52,10 +53,9 @@ export class NFIDWalletAdapter extends WalletAdapter {
 
     /**
      * Connect to NFID wallet
-     * Opens NFID's authentication page for user login
+     * Opens NFID's authentication page
      */
     async connect() {
-        
         try {
             // Create auth client if not exists
             if (!this.authClient) {
@@ -170,7 +170,6 @@ export class NFIDWalletAdapter extends WalletAdapter {
         }
 
         const { to, amount, ledgerCanisterId } = params;
-
 
         try {
             // Create ledger actor with NFID's agent
