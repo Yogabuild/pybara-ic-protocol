@@ -120,8 +120,16 @@ export class PybaraAgent {
       return principal;
       
     } catch (error) {
-      if (this.debug) {
+      // Don't log user cancellations as errors
+      const errorMsg = error?.message || String(error);
+      const isCancellation = errorMsg.toLowerCase().includes('rejected by user') ||
+                             errorMsg.toLowerCase().includes('cancelled by user') ||
+                             errorMsg.toLowerCase().includes('connection rejected');
+      
+      if (this.debug && !isCancellation) {
         console.error('❌ Wallet connection failed:', error);
+      } else if (this.debug) {
+        console.log('ℹ️ User cancelled wallet connection');
       }
       throw error;
     }

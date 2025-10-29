@@ -78,19 +78,32 @@ export class PlugWalletAdapter extends WalletAdapter {
             return this.principal;
             
         } catch (error) {
+            // Check if user cancelled/rejected
+            const errorMsg = error.message || String(error);
+            const isCancellation = !error.message || 
+                                   errorMsg.includes('rejected') ||
+                                   errorMsg.includes('cancelled') ||
+                                   errorMsg.includes('denied') ||
+                                   errorMsg === 'undefined';
+            
+            if (isCancellation) {
+                // User rejected - don't log as error
+                if (this.debug) {
+                    console.log('ℹ️ Plug connection cancelled by user');
+                }
+                throw this.createError('Connection rejected by user');
+            }
+            
+            // Actual error - log it
             if (this.debug) {
                 console.error('❌ Failed to connect to Plug:', error);
             }
             
-            // Handle specific errors
-            if (error.message?.includes('rejected')) {
-                throw this.createError('Connection rejected by user');
-            }
-            if (error.message?.includes('timeout')) {
+            if (errorMsg.includes('timeout')) {
                 throw this.createError('Connection timeout. Please try again.');
             }
             
-            throw this.createError(`Connection failed: ${error.message}`);
+            throw this.createError(`Connection failed: ${errorMsg}`);
         }
     }
 

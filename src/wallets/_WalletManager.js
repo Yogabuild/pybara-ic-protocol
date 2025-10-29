@@ -107,10 +107,22 @@ export class WalletManager {
             return principal;
             
         } catch (error) {
-            if (this.debug) {
+            // Don't log user cancellations as errors
+            const errorMsg = error?.message || String(error);
+            const isCancellation = errorMsg.toLowerCase().includes('rejected by user') ||
+                                   errorMsg.toLowerCase().includes('cancelled by user') ||
+                                   errorMsg.toLowerCase().includes('connection rejected');
+            
+            if (this.debug && !isCancellation) {
                 console.error(`❌ Failed to connect to ${wallet.name}:`, error);
+            } else if (this.debug) {
+                console.log(`ℹ️ User cancelled ${wallet.name} connection`);
             }
-            this.emit('error', { wallet: wallet.type, error });
+            
+            // Only emit error event for actual errors, not user cancellations
+            if (!isCancellation) {
+                this.emit('error', { wallet: wallet.type, error });
+            }
             throw error;
         }
     }
